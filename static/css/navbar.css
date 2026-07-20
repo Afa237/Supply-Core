@@ -1,0 +1,23 @@
+.navbar-custom{
+
+    background:white;
+
+    padding:20px 35px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    box-shadow:0 3px 8px rgba(0,0,0,.08);
+
+}
+
+.user{
+
+    margin-left:15px;
+
+    font-weight:bold;
+
+}
