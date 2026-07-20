@@ -26,32 +26,45 @@ Supply Core
 
 </h2>
 
-<form>
+<form method="POST">
 
-<div class="mb-3">
+    {% csrf_token %}
 
-<label>Email</label>
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
 
-<input type="email" class="form-control">
+    <div class="mb-3">
 
-</div>
+        <label>Username</label>
 
-<div class="mb-3">
+        <input
+            type="text"
+            name="username"
+            class="form-control"
+            required>
 
-<label>Password</label>
+    </div>
 
-<input type="password" class="form-control">
+    <div class="mb-3">
 
-</div>
+        <label>Password</label>
 
-<button class="btn btn-primary w-100">
+        <input
+            type="password"
+            name="password"
+            class="form-control"
+            required>
 
-Login
+    </div>
 
-</button>
+    <button class="btn btn-primary w-100">
+        Login
+    </button>
 
 </form>
-
 </div>
 
 </div>
