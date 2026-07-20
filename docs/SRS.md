@@ -1,2 +1,0 @@
-# SRS
-Initial draft.

@@ -1,1 +1,0 @@
-# inventory views.py

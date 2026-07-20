@@ -1,1 +1,0 @@
-# suppliers urls.py

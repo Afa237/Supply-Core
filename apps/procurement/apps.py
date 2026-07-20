@@ -1,1 +1,0 @@
-# procurement apps.py
