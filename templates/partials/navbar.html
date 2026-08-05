@@ -1,21 +1,23 @@
 <nav class="navbar-custom">
-
     <div>
-
         <h4>Dashboard</h4>
-
     </div>
 
-    <div>
-
-        🔔
+    <div class="navbar-user">
+        <span class="notification-icon">🔔</span>
 
         <span class="user">
-
-            Florence
-
+            {{ request.user.get_full_name|default:request.user.username }}
         </span>
 
-    </div>
+        {% if request.user.profile %}
+            <small class="user-role">
+                {{ request.user.profile.get_role_display }}
+            </small>
+        {% endif %}
 
+        <a href="{% url 'logout' %}" class="logout-link">
+            Logout
+        </a>
+    </div>
 </nav>

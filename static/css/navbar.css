@@ -21,3 +21,22 @@
     font-weight:bold;
 
 }
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-role {
+    color: #64748b;
+}
+
+.logout-link {
+    color: #ef4444;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.logout-link:hover {
+    text-decoration: underline;
+}
