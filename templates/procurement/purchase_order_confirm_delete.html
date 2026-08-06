@@ -1,0 +1,33 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+
+        <h2>Delete Purchase Order</h2>
+
+        <p>
+            Are you sure you want to delete
+            <strong>{{ purchase_order.po_number }}</strong>?
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <button class="btn btn-danger">
+                Yes, Delete
+            </button>
+
+            <a
+                href="{% url 'purchase_order_list' %}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
