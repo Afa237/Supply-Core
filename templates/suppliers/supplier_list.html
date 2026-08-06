@@ -1,0 +1,88 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Suppliers</h2>
+        <p class="text-muted mb-0">
+            Manage supplier records and contact information.
+        </p>
+    </div>
+
+    <a href="{% url 'supplier_create' %}" class="btn btn-primary">
+        Add Supplier
+    </a>
+</div>
+
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            class="form-control"
+            placeholder="Search suppliers by name"
+        >
+
+        <button class="btn btn-outline-primary" type="submit">
+            Search
+        </button>
+    </div>
+</form>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Contact Person</th>
+                        <th>Phone</th>
+                        <th>Country</th>
+                        <th>Status</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for supplier in suppliers %}
+                        <tr>
+                            <td>{{ supplier.name }}</td>
+                            <td>{{ supplier.contact_person|default:"—" }}</td>
+                            <td>{{ supplier.phone|default:"—" }}</td>
+                            <td>{{ supplier.country }}</td>
+                            <td>{{ supplier.get_status_display }}</td>
+                            <td>{{ supplier.rating }}/5</td>
+                            <td>
+                                <a
+                                    href="{% url 'supplier_update' supplier.id %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Edit
+                                </a>
+
+                                <a
+                                    href="{% url 'supplier_delete' supplier.id %}"
+                                    class="btn btn-sm btn-outline-danger"
+                                >
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No suppliers found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

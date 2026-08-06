@@ -43,3 +43,8 @@
     background:#2b53a5;
 
 }
+.menu a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}

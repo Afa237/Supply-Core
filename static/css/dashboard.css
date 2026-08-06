@@ -63,3 +63,26 @@ body{
     box-shadow:0 5px 15px rgba(0,0,0,.08);
 
 }
+.page-content input,
+.page-content select,
+.page-content textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dbe1ea;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.page-content input:focus,
+.page-content select:focus,
+.page-content textarea:focus {
+    outline: none;
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+.table td {
+    vertical-align: middle;
+}
+.table .btn {
+    white-space: nowrap;
+}

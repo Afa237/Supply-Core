@@ -1,0 +1,28 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <h2>Delete Supplier</h2>
+
+        <p>
+            Are you sure you want to delete
+            <strong>{{ supplier.name }}</strong>?
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-danger">
+                Yes, Delete
+            </button>
+
+            <a href="{% url 'supplier_list' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

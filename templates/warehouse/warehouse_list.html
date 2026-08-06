@@ -1,0 +1,122 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Warehouses</h2>
+        <p class="text-muted mb-0">
+            Manage storage facilities and warehouse capacity.
+        </p>
+    </div>
+
+    <a href="{% url 'warehouse_create' %}" class="btn btn-primary">
+        Add Warehouse
+    </a>
+</div>
+
+<form method="get" class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="Search by name, code, city or manager"
+                >
+            </div>
+
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All statuses</option>
+                    <option
+                        value="active"
+                        {% if selected_status == "active" %}selected{% endif %}
+                    >
+                        Active
+                    </option>
+                    <option
+                        value="inactive"
+                        {% if selected_status == "inactive" %}selected{% endif %}
+                    >
+                        Inactive
+                    </option>
+                    <option
+                        value="maintenance"
+                        {% if selected_status == "maintenance" %}selected{% endif %}
+                    >
+                        Under Maintenance
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-outline-primary w-100">
+                    Filter
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Code</th>
+                        <th>Manager</th>
+                        <th>Location</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for warehouse in warehouses %}
+                        <tr>
+                            <td>{{ warehouse.name }}</td>
+                            <td>{{ warehouse.code }}</td>
+                            <td>
+                                {{ warehouse.manager_name|default:"—" }}
+                            </td>
+                            <td>
+                                {{ warehouse.city }},
+                                {{ warehouse.country }}
+                            </td>
+                            <td>{{ warehouse.capacity }}</td>
+                            <td>{{ warehouse.get_status_display }}</td>
+                            <td>
+                                <a
+                                    href="{% url 'warehouse_update' warehouse.id %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Edit
+                                </a>
+
+                                <a
+                                    href="{% url 'warehouse_delete' warehouse.id %}"
+                                    class="btn btn-sm btn-outline-danger"
+                                >
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No warehouses found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<h2 class="mb-2">Record Stock Movement</h2>
+
+<p class="text-muted">
+    {{ inventory.product.name }} — {{ inventory.warehouse.name }}
+    — Current stock: {{ inventory.quantity }}
+</p>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% for error in field.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button class="btn btn-primary">
+                Save Movement
+            </button>
+
+            <a
+                href="{% url 'inventory_list' %}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
