@@ -1,5 +1,7 @@
 from django.db import models
 from suppliers.models import Supplier
+from products.models import Product
+
 class PurchaseOrder(models.Model):
 
     STATUS_CHOICES = [
@@ -43,5 +45,38 @@ class PurchaseOrder(models.Model):
 
     def __str__(self):
         return self.po_number
+    @property
+    def calculated_total(self):
+        return sum(item.total for item in self.items.all())
+
+class PurchaseOrderItem(models.Model):
+
+    purchase_order = models.ForeignKey(
+        PurchaseOrder,
+        on_delete=models.CASCADE,
+        related_name="items",
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+    )
+
+    quantity = models.PositiveIntegerField()
+
+    unit_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    class Meta:
+        unique_together = ("purchase_order", "product")
+
+    @property
+    def total(self):
+        return self.quantity * self.unit_price
+
+    def __str__(self):
+        return f"{self.purchase_order.po_number} - {self.product.name}"
 
 # Create your models here.

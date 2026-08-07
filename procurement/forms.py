@@ -1,6 +1,8 @@
 from django import forms
 
-from .models import PurchaseOrder
+from products.models import Product
+
+from .models import PurchaseOrder, PurchaseOrderItem
 
 
 class PurchaseOrderForm(forms.ModelForm):
@@ -12,20 +14,13 @@ class PurchaseOrderForm(forms.ModelForm):
             "order_date",
             "expected_delivery",
             "status",
-            "total_amount",
             "remarks",
         ]
 
         widgets = {
-            "order_date": forms.DateInput(
-                attrs={"type": "date"}
-            ),
-            "expected_delivery": forms.DateInput(
-                attrs={"type": "date"}
-            ),
-            "remarks": forms.Textarea(
-                attrs={"rows": 3}
-            ),
+            "order_date": forms.DateInput(attrs={"type": "date"}),
+            "expected_delivery": forms.DateInput(attrs={"type": "date"}),
+            "remarks": forms.Textarea(attrs={"rows": 3}),
         }
 
     def clean(self):
@@ -45,3 +40,22 @@ class PurchaseOrderForm(forms.ModelForm):
             )
 
         return cleaned_data
+
+
+class PurchaseOrderItemForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseOrderItem
+        fields = [
+            "product",
+            "quantity",
+            "unit_price",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        supplier = kwargs.pop("supplier", None)
+        super().__init__(*args, **kwargs)
+
+        if supplier:
+            self.fields["product"].queryset = Product.objects.filter(
+                supplier=supplier
+            )

@@ -29,4 +29,19 @@ urlpatterns = [
         views.purchase_order_delete,
         name="purchase_order_delete",
     ),
+    path(
+    "<int:po_id>/items/add/",
+    views.purchase_order_item_create,
+    name="purchase_order_item_create",
+    ),
+    path(
+        "items/<int:item_id>/edit/",
+        views.purchase_order_item_update,
+        name="purchase_order_item_update",
+        ),
+    path(
+        "items/<int:item_id>/delete/",
+        views.purchase_order_item_delete,
+        name="purchase_order_item_delete",
+        ),
 ]

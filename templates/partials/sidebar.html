@@ -1,56 +1,73 @@
-<div class="sidebar">
+<aside class="sidebar" id="sidebar">
 
-    <div class="brand">
-        <h3>Supply Core</h3>
-        <small>Enterprise SCM</small>
+    <div class="sidebar-header">
+
+        <div class="brand-wrapper">
+            <div class="brand-icon">SC</div>
+
+            <div class="brand-text">
+                <h4>Supply Core</h4>
+                <span>Enterprise SCM</span>
+            </div>
+        </div>
+
+        <button
+            type="button"
+            class="sidebar-close"
+            id="sidebarClose"
+        >
+            ×
+        </button>
+
     </div>
 
-    <ul class="menu">
+    <nav class="sidebar-menu">
 
-        <li class="active">🏠 Dashboard</li>
+        <a href="{% url 'home' %}">
+            <span>🏠</span>
+            <span class="menu-text">Dashboard</span>
+        </a>
 
-        <li>
-            <a href="{% url 'product_list' %}">
-                📦 Products
-            </a>
-        </li>
+        <a href="{% url 'product_list' %}">
+            <span>📦</span>
+            <span class="menu-text">Products</span>
+        </a>
 
-        <li>
-            <a href="{% url 'supplier_list' %}">
-                🏢 Suppliers
-            </a>
-        </li>
+        <a href="{% url 'supplier_list' %}">
+            <span>🏢</span>
+            <span class="menu-text">Suppliers</span>
+        </a>
 
-        <li>
-            <a href="{% url 'purchase_order_list' %}">
-                📑 Procurement
-            </a>
-        </li>
+        <a href="{% url 'purchase_order_list' %}">
+            <span>📑</span>
+            <span class="menu-text">Procurement</span>
+        </a>
 
-        <li>
-            <a href="{% url 'inventory_list' %}">
-               📊 Inventory
-            </a>
-        </li>
+        <a href="{% url 'inventory_list' %}">
+            <span>📊</span>
+            <span class="menu-text">Inventory</span>
+        </a>
 
-        <li>
-            <a href="{% url 'warehouse_list' %}">
-                🏭 Warehouses
-            </a>
-        </li>
+        <a href="{% url 'warehouse_list' %}">
+            <span>🏭</span>
+            <span class="menu-text">Warehouses</span>
+        </a>
 
-        <li>
-                🚚 Logistics
-        </li>
+        <a href="{% url 'shipment_list' %}">
+            <span>🚚</span>
+            <span class="menu-text">Logistics</span>
+        </a>
 
-        <li>
-                📈 Reports
-        </li>
+        <a href="#">
+            <span>📈</span>
+            <span class="menu-text">Reports</span>
+        </a>
 
-        <li>
-                ⚙ Settings
-        </li>
+        <a href="#">
+            <span>⚙️</span>
+            <span class="menu-text">Settings</span>
+        </a>
 
-    </ul>
+    </nav>
 
-</div>
+</aside>

@@ -10,17 +10,33 @@
         </p>
     </div>
 
-    <a
-        href="{% url 'purchase_order_update' purchase_order.id %}"
-        class="btn btn-primary"
-    >
-        Edit Purchase Order
-    </a>
+    <div class="d-flex gap-2">
+        <a
+            href="{% url 'purchase_order_item_create' purchase_order.id %}"
+            class="btn btn-success"
+        >
+            Add Item
+        </a>
+
+        <a
+            href="{% url 'purchase_order_update' purchase_order.id %}"
+            class="btn btn-primary"
+        >
+            Edit Purchase Order
+        </a>
+    </div>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
 
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
         <div class="row">
 
             <div class="col-md-6 mb-3">
@@ -35,16 +51,12 @@
 
             <div class="col-md-6 mb-3">
                 <strong>Order Date</strong>
-                <p>
-                    {{ purchase_order.order_date|date:"d M Y" }}
-                </p>
+                <p>{{ purchase_order.order_date|date:"d M Y" }}</p>
             </div>
 
             <div class="col-md-6 mb-3">
                 <strong>Expected Delivery</strong>
-                <p>
-                    {{ purchase_order.expected_delivery|date:"d M Y" }}
-                </p>
+                <p>{{ purchase_order.expected_delivery|date:"d M Y" }}</p>
             </div>
 
             <div class="col-md-6 mb-3">
@@ -54,11 +66,70 @@
 
             <div class="col-md-12 mb-3">
                 <strong>Remarks</strong>
-                <p>
-                    {{ purchase_order.remarks|default:"No remarks" }}
-                </p>
+                <p>{{ purchase_order.remarks|default:"No remarks" }}</p>
             </div>
 
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+
+        <h4 class="mb-3">Purchase Order Items</h4>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in purchase_order.items.all %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.product.sku }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.unit_price }}</td>
+                            <td>{{ item.total }}</td>
+                            <td>
+                                <div class="d-flex flex-column gap-2">
+                                    <a
+                                        href="{% url 'purchase_order_item_update' item.id %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <a
+                                        href="{% url 'purchase_order_item_delete' item.id %}"
+                                        class="btn btn-sm btn-outline-danger"
+                                    >
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td
+                                colspan="6"
+                                class="text-center text-muted py-4"
+                            >No items added yet.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
         </div>
 
         <a
