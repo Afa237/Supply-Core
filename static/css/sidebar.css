@@ -98,3 +98,7 @@
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
 }
+.sidebar-menu a.active {
+    background: rgba(255, 255, 255, 0.18);
+    font-weight: 600;
+}

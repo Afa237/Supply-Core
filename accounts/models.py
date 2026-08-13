@@ -3,15 +3,23 @@ from django.db import models
 
 
 class UserProfile(models.Model):
+
     ROLE_CHOICES = [
         ("admin", "System Administrator"),
         ("supply_chain_manager", "Supply Chain Manager"),
-        ("procurement_officer", "Procurement Officer"),
-        ("warehouse_manager", "Warehouse Manager"),
-        ("inventory_officer", "Inventory Officer"),
-        ("logistics_officer", "Logistics Officer"),
-        ("finance_officer", "Finance Officer"),
+        ("manager", "Department Manager"),
+        ("officer", "Officer"),
         ("viewer", "Viewer"),
+    ]
+
+    DEPARTMENT_CHOICES = [
+        ("administration", "Administration"),
+        ("procurement", "Procurement"),
+        ("inventory", "Inventory"),
+        ("warehouse", "Warehouse"),
+        ("logistics", "Logistics"),
+        ("finance", "Finance"),
+        ("supply_chain", "Supply Chain"),
     ]
 
     user = models.OneToOneField(
@@ -26,17 +34,22 @@ class UserProfile(models.Model):
         default="viewer",
     )
 
+    department = models.CharField(
+        max_length=30,
+        choices=DEPARTMENT_CHOICES,
+        blank=True,
+    )
+
     phone_number = models.CharField(
         max_length=20,
         blank=True,
     )
 
-    department = models.CharField(
-        max_length=100,
-        blank=True,
-    )
-
     def __str__(self):
-        return f"{self.user.username} - {self.get_role_display()}"
+        return (
+            f"{self.user.username} - "
+            f"{self.get_department_display() or 'No Department'} - "
+            f"{self.get_role_display()}"
+        )
 
 # Create your models here.

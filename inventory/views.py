@@ -2,14 +2,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-
 from warehouse.models import Warehouse
-
+from accounts.decorators import (
+    department_required,
+    role_required,
+)
 from .forms import InventoryForm, StockMovementForm
 from .models import Inventory, StockMovement
 
 
 @login_required
+@department_required("inventory")
+@role_required("viewer")
 def inventory_list(request):
     inventory_records = Inventory.objects.select_related(
         "product",
@@ -55,6 +59,8 @@ def inventory_list(request):
 
 
 @login_required
+@department_required("inventory")
+@role_required("officer")
 def inventory_create(request):
     if request.method == "POST":
         form = InventoryForm(request.POST)
@@ -80,6 +86,8 @@ def inventory_create(request):
 
 
 @login_required
+@department_required("inventory")
+@role_required("officer")
 def inventory_update(request, inventory_id):
     inventory = get_object_or_404(
         Inventory,
@@ -113,6 +121,8 @@ def inventory_update(request, inventory_id):
 
 
 @login_required
+@department_required("inventory")
+@role_required("officer")
 def stock_movement_create(request, inventory_id):
     inventory = get_object_or_404(
         Inventory,
@@ -172,6 +182,8 @@ def stock_movement_create(request, inventory_id):
 
 
 @login_required
+@department_required("inventory")
+@role_required("viewer")
 def stock_movement_list(request):
     movements = StockMovement.objects.select_related(
         "inventory__product",

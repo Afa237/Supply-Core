@@ -2,6 +2,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from accounts.decorators import (
+    department_required,
+    role_required,
+)
 
 from .forms import DriverForm, ShipmentForm, VehicleForm
 from .models import Driver, Shipment, Vehicle
@@ -9,6 +13,8 @@ from inventory.models import Inventory,StockMovement
 
 
 @login_required
+@department_required("logistics")
+@role_required("viewer")
 def shipment_list(request):
     shipments = Shipment.objects.select_related(
         "purchase_order",
@@ -44,6 +50,8 @@ def shipment_list(request):
 
 
 @login_required
+@department_required("logistics")
+@role_required("officer")
 def shipment_create(request):
     if request.method == "POST":
         form = ShipmentForm(request.POST)
@@ -73,6 +81,8 @@ def shipment_create(request):
 
 
 @login_required
+@department_required("logistics")
+@role_required("officer")
 def shipment_update(request, shipment_id):
     shipment = get_object_or_404(
         Shipment,
@@ -108,6 +118,8 @@ def shipment_update(request, shipment_id):
 
 
 @login_required
+@department_required("logistics")
+@role_required("viewer")
 def shipment_detail(request, shipment_id):
     shipment = get_object_or_404(
         Shipment.objects.select_related(
@@ -128,6 +140,8 @@ def shipment_detail(request, shipment_id):
 
 
 @login_required
+@department_required("logistics")
+@role_required("manager")
 def shipment_delete(request, shipment_id):
     shipment = get_object_or_404(
         Shipment,
@@ -152,6 +166,8 @@ def shipment_delete(request, shipment_id):
 
 
 @login_required
+@department_required("logistics")
+@role_required("viewer")
 def driver_list(request):
     drivers = Driver.objects.all()
 
@@ -163,6 +179,8 @@ def driver_list(request):
 
 
 @login_required
+@department_required("logistics")
+@role_required("officer")
 def driver_create(request):
     if request.method == "POST":
         form = DriverForm(request.POST)
@@ -184,6 +202,8 @@ def driver_create(request):
 
 
 @login_required
+@department_required("logistics")
+@role_required("viewer")
 def vehicle_list(request):
     vehicles = Vehicle.objects.all()
 
@@ -195,6 +215,8 @@ def vehicle_list(request):
 
 
 @login_required
+@department_required("logistics")
+@role_required("officer")
 def vehicle_create(request):
     if request.method == "POST":
         form = VehicleForm(request.POST)
@@ -215,6 +237,7 @@ def vehicle_create(request):
         },
     )
 @login_required
+@department_required("logistics")
 def receive_shipment(request, shipment_id):
     shipment = get_object_or_404(
         Shipment.objects.select_related(

@@ -2,11 +2,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from accounts.decorators import (
+    department_required,
+    role_required,
+)
 
 from .forms import PurchaseOrderForm, PurchaseOrderItemForm
 from .models import PurchaseOrder, PurchaseOrderItem
 
+
 @login_required
+@department_required("procurement")
+@role_required("viewer")
 def purchase_order_list(request):
     purchase_orders = PurchaseOrder.objects.select_related(
         "supplier"
@@ -39,6 +46,8 @@ def purchase_order_list(request):
 
 
 @login_required
+@department_required("procurement")
+@role_required("officer")
 def purchase_order_create(request):
     if request.method == "POST":
         form = PurchaseOrderForm(request.POST)
@@ -66,6 +75,8 @@ def purchase_order_create(request):
 
 
 @login_required
+@department_required("procurement")
+@role_required("officer")
 def purchase_order_update(request, po_id):
     purchase_order = get_object_or_404(
         PurchaseOrder,
@@ -103,6 +114,8 @@ def purchase_order_update(request, po_id):
 
 
 @login_required
+@department_required("procurement")
+@role_required("manager")
 def purchase_order_delete(request, po_id):
     purchase_order = get_object_or_404(
         PurchaseOrder,
@@ -129,6 +142,8 @@ def purchase_order_delete(request, po_id):
 
 
 @login_required
+@department_required("procurement")
+@role_required("viewer")
 def purchase_order_detail(request, po_id):
     purchase_order = get_object_or_404(
         PurchaseOrder.objects.select_related("supplier"),
@@ -143,6 +158,8 @@ def purchase_order_detail(request, po_id):
         },
     )
 @login_required
+@department_required("procurement")
+@role_required("officer")
 def purchase_order_item_create(request, po_id):
     purchase_order = get_object_or_404(
         PurchaseOrder,
@@ -191,6 +208,8 @@ def purchase_order_item_create(request, po_id):
 
 
 @login_required
+@department_required("procurement")
+@role_required("officer")
 def purchase_order_item_update(request, item_id):
     item = get_object_or_404(
         PurchaseOrderItem.objects.select_related(
@@ -244,6 +263,8 @@ def purchase_order_item_update(request, item_id):
 
 
 @login_required
+@department_required("procurement")
+@role_required("officer")
 def purchase_order_item_delete(request, item_id):
     item = get_object_or_404(
         PurchaseOrderItem.objects.select_related(

@@ -21,52 +21,151 @@
 
     </div>
 
+
     <nav class="sidebar-menu">
 
+        <!-- DASHBOARD -->
         <a href="{% url 'home' %}">
             <span>🏠</span>
             <span class="menu-text">Dashboard</span>
         </a>
 
-        <a href="{% url 'product_list' %}">
-            <span>📦</span>
-            <span class="menu-text">Products</span>
-        </a>
 
-        <a href="{% url 'supplier_list' %}">
-            <span>🏢</span>
-            <span class="menu-text">Suppliers</span>
-        </a>
+        {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" %}
 
-        <a href="{% url 'purchase_order_list' %}">
-            <span>📑</span>
-            <span class="menu-text">Procurement</span>
-        </a>
+            <!-- FULL ACCESS -->
 
-        <a href="{% url 'inventory_list' %}">
-            <span>📊</span>
-            <span class="menu-text">Inventory</span>
-        </a>
+            <a href="{% url 'product_list' %}"
+                class="{% if '/product/' in request.path %}active{% endif %}">
+                <span>📦</span>
+                <span class="menu-text">Products</span>
+            </a>
 
-        <a href="{% url 'warehouse_list' %}">
-            <span>🏭</span>
-            <span class="menu-text">Warehouses</span>
-        </a>
+            <a href="{% url 'supplier_list' %}"
+                class="{% if '/supplier/' in request.path %}active{% endif %}">
+                <span>🏢</span>
+                <span class="menu-text">Suppliers</span>
+            </a>
 
-        <a href="{% url 'shipment_list' %}">
-            <span>🚚</span>
-            <span class="menu-text">Logistics</span>
-        </a>
+            <a href="{% url 'purchase_order_list' %}"
+                class="{% if '/procurement/' in request.path %}active{% endif %}">
+                <span>📑</span>
+                <span class="menu-text">Procurement</span>
+            </a>
 
-        <a href="#">
-            <span>📈</span>
-            <span class="menu-text">Reports</span>
-        </a>
+            <a href="{% url 'inventory_list' %}"
+                class="{% if '/inventory/' in request.path %}active{% endif %}">
+                <span>📊</span>
+                <span class="menu-text">Inventory</span>
+            </a>
 
-        <a href="#">
-            <span>⚙️</span>
-            <span class="menu-text">Settings</span>
-        </a>
+            <a href="{% url 'warehouse_list' %}"
+                class="{% if '/warehouse/' in request.path %}active{% endif %}">
+                <span>🏭</span>
+                <span class="menu-text">Warehouses</span>
+            </a>
+
+            <a href="{% url 'shipment_list' %}"
+                class="{% if '/shipment/' in request.path %}active{% endif %}">
+                <span>🚚</span>
+                <span class="menu-text">Logistics</span>
+            </a>
+
+            <a href="#">
+                <span>📈</span>
+                <span class="menu-text">Reports</span>
+            </a>
+
+            <a href="#">
+                <span>⚙️</span>
+                <span class="menu-text">Settings</span>
+            </a>
+
+
+        {% elif request.user.profile.department == "procurement" %}
+
+            <!-- PROCUREMENT -->
+
+            <a href="{% url 'product_list' %}">
+                <span>📦</span>
+                <span class="menu-text">Products</span>
+            </a>
+
+            <a href="{% url 'supplier_list' %}">
+                <span>🏢</span>
+                <span class="menu-text">Suppliers</span>
+            </a>
+
+            <a href="{% url 'purchase_order_list' %}">
+                <span>📑</span>
+                <span class="menu-text">Procurement</span>
+            </a>
+
+
+        {% elif request.user.profile.department == "logistics" %}
+
+            <!-- LOGISTICS -->
+
+            <a href="{% url 'shipment_list' %}">
+                <span>🚚</span>
+                <span class="menu-text">Shipments</span>
+            </a>
+
+            <a href="{% url 'driver_list' %}">
+                <span>👤</span>
+                <span class="menu-text">Drivers</span>
+            </a>
+
+            <a href="{% url 'vehicle_list' %}">
+                <span>🚛</span>
+                <span class="menu-text">Vehicles</span>
+            </a>
+
+
+        {% elif request.user.profile.department == "inventory" %}
+
+            <!-- INVENTORY -->
+
+            <a href="{% url 'inventory_list' %}">
+                <span>📊</span>
+                <span class="menu-text">Inventory</span>
+            </a>
+
+            <a href="{% url 'stock_movement_list' %}">
+                <span>🔄</span>
+                <span class="menu-text">Stock Movements</span>
+            </a>
+
+
+        {% elif request.user.profile.department == "warehouse" %}
+
+            <!-- WAREHOUSE -->
+
+            <a href="{% url 'warehouse_list' %}">
+                <span>🏭</span>
+                <span class="menu-text">Warehouses</span>
+            </a>
+
+            <a href="{% url 'inventory_list' %}">
+                <span>📊</span>
+                <span class="menu-text">Inventory</span>
+            </a>
+
+
+        {% elif request.user.profile.department == "finance" %}<!-- FINANCE -->
+
+            <a href="{% url 'purchase_order_list' %}">
+                <span>💰</span>
+                <span class="menu-text">Purchase Orders</span>
+            </a>
+
+            <a href="#">
+                <span>📈</span>
+                <span class="menu-text">Financial Reports</span>
+            </a>
+
+
+        {% endif %}
 
     </nav>
 

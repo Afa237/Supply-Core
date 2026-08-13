@@ -1,12 +1,17 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-
+from accounts.decorators import (
+    department_required,
+    role_required,
+)
 from .forms import WarehouseForm
 from .models import Warehouse
 
 
 @login_required
+@department_required("warehouse")
+@role_required("viewer")
 def warehouse_list(request):
     warehouses = Warehouse.objects.all()
 
@@ -36,6 +41,8 @@ def warehouse_list(request):
 
 
 @login_required
+@department_required("warehouse")
+@role_required("officer")
 def warehouse_create(request):
     if request.method == "POST":
         form = WarehouseForm(request.POST)
@@ -57,6 +64,8 @@ def warehouse_create(request):
 
 
 @login_required
+@department_required("warehouse")
+@role_required("officer")
 def warehouse_update(request, warehouse_id):
     warehouse = get_object_or_404(
         Warehouse,
@@ -86,6 +95,8 @@ def warehouse_update(request, warehouse_id):
 
 
 @login_required
+@department_required("warehouse")
+@role_required("manager")
 def warehouse_delete(request, warehouse_id):
     warehouse = get_object_or_404(
         Warehouse,

@@ -2,64 +2,245 @@
 
 {% block content %}
 
-<h2 class="mb-4">
+<div class="dashboard-header mb-4">
 
-Welcome to Supply Core
+    <h2>
+        Welcome,
+        {{ request.user.first_name|default:request.user.username }}
+    </h2>
 
-</h2>
+    {% if request.user.is_superuser %}
+        <p class="text-muted">
+            System-wide Supply Core overview
+        </p>
 
-<div class="dashboard-grid">
+    {% else %}
 
-<div class="card-box">
+        {% if request.user.profile %}
+            <p class="text-muted">
+                {{ request.user.profile.get_department_display }}
+                Dashboard
+            </p>
+        {% endif %}
 
-<h5>Total Products</h5>
-
-<h2>0</h2>
-
-</div>
-
-<div class="card-box">
-
-<h5>Suppliers</h5>
-
-<h2>0</h2>
-
-</div>
-
-<div class="card-box">
-
-<h5>Purchase Orders</h5>
-
-<h2>0</h2>
+    {% endif %}
 
 </div>
 
-<div class="card-box">
 
-<h5>Shipments</h5>
+{% if is_full_access %}
 
-<h2>0</h2>
+    <div class="row g-3">
 
-</div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small class="text-muted">Products</small>
+                <h3>{{ total_products }}</h3>
+            </div>
+        </div>
 
-</div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small class="text-muted">Suppliers</small>
+                <h3>{{ total_suppliers }}</h3>
+            </div>
+        </div>
 
-<div class="activity">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small class="text-muted">Purchase Orders</small>
+                <h3>{{ total_purchase_orders }}</h3>
+            </div>
+        </div>
 
-<h4>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small class="text-muted">Shipments</small>
+                <h3>{{ total_shipments }}</h3>
+            </div>
+        </div>
 
-Recent Activity
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small class="text-muted">Warehouses</small>
+                <h3>{{ total_warehouses }}</h3>
+            </div>
+        </div>
 
-</h4>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small class="text-muted">Low Stock</small>
+                <h3>{{ low_stock_count }}</h3>
+            </div>
+        </div>
 
-<hr>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small class="text-muted">In Transit</small>
+                <h3>{{ in_transit_shipments }}</h3>
+            </div>
+        </div>
 
-<p>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small class="text-muted">Delayed Shipments</small>
+                <h3>{{ delayed_shipments }}</h3>
+            </div>
+        </div>
 
-No activities available.
+    </div>
 
-</p>
 
-</div>
+{% elif department == "procurement" %}
+
+    <div class="row g-3">
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Purchase Orders</small>
+                <h3>{{ total_purchase_orders }}</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Pending</small>
+                <h3>{{ pending_purchase_orders }}</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Suppliers</small>
+                <h3>{{ total_suppliers }}</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Products</small>
+                <h3>{{ total_products }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+
+{% elif department == "logistics" %}
+
+    <div class="row g-3">
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Total Shipments</small>
+                <h3>{{ total_shipments }}</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>In Transit</small>
+                <h3>{{ in_transit_shipments }}</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6"><div class="card border-0 shadow-sm p-3">
+                <small>Delayed</small>
+                <h3>{{ delayed_shipments }}</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Delivered</small>
+                <h3>{{ delivered_shipments }}</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Drivers</small>
+                <h3>{{ total_drivers }}</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Vehicles</small>
+                <h3>{{ total_vehicles }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+
+{% elif department == "inventory" %}
+
+    <div class="row g-3">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Warehouses</small>
+                <h3>{{ total_warehouses }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Inventory Records</small>
+                <h3>{{ inventory_records }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Low Stock</small>
+                <h3>{{ low_stock_count }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+
+{% elif department == "warehouse" %}
+
+    <div class="row g-3">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Warehouses</small>
+                <h3>{{ total_warehouses }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Inventory Records</small>
+                <h3>{{ inventory_records }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <small>Low Stock</small>
+                <h3>{{ low_stock_count }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+
+{% else %}
+
+    <div class="alert alert-info">
+
+        Your account is active, but you have not yet
+        been assigned to a department.
+
+        Please contact your Supply Core administrator.
+
+    </div>
+
+{% endif %}
 
 {% endblock %}

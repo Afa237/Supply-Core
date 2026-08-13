@@ -11,7 +11,9 @@
     <div class="d-flex gap-2 flex-wrap">
         <a href="{% url 'driver_list' %}" class="btn btn-outline-primary">Drivers</a>
         <a href="{% url 'vehicle_list' %}" class="btn btn-outline-primary">Vehicles</a>
-        <a href="{% url 'shipment_create' %}" class="btn btn-primary">Create Shipment</a>
+        {% if request.user.is_superuser or request.user.profile.role != "viewer" %}
+            <a href="{% url 'shipment_create' %}" class="btn btn-primary">Create Shipment</a>
+        {% endif %}
     </div>
 </div>
 
@@ -77,10 +79,14 @@
                                 <div class="actions-grid">
                                     <a href="{% url 'shipment_detail' shipment.id %}"
                                        class="btn btn-sm btn-outline-dark">View</a>
+                                       {% if request.user.is_superuser or request.user.profile.role != "viewer" %}
                                     <a href="{% url 'shipment_update' shipment.id %}"
                                        class="btn btn-sm btn-outline-primary">Edit</a>
+                                       {% endif %}
+                                    {% if request.user.is_superuser or request.user.profile.role != "manager" or request.user.profile.role == "officer" or request.user.profile.role == "viewer" %}
                                     <a href="{% url 'shipment_delete' shipment.id %}"
                                        class="btn btn-sm btn-outline-danger">Delete</a>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

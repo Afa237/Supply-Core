@@ -12,6 +12,7 @@
 
         <div>
             <h5 class="mb-0">Supply Core</h5>
+
             <small class="text-muted">
                 Supply Chain Management
             </small>
@@ -19,23 +20,42 @@
 
     </div>
 
+
     <div class="navbar-right">
 
-        <button class="nav-icon-btn" type="button">
+        <button
+            class="nav-icon-btn"
+            type="button"
+        >
             🔔
         </button>
 
+
         <div class="user-info">
+
             <strong>
                 {{ request.user.get_full_name|default:request.user.username }}
             </strong>
 
-            {% if request.user.profile %}
+
+            {% if request.user.is_superuser %}
+
                 <small>
+                    System Administrator
+                </small>
+
+            {% elif request.user.profile %}
+
+                <small>
+                    {{ request.user.profile.get_department_display }}
+                    •
                     {{ request.user.profile.get_role_display }}
                 </small>
+
             {% endif %}
+
         </div>
+
 
         <a
             href="{% url 'logout' %}"
