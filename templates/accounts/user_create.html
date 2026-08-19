@@ -1,0 +1,104 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <h2>Create Staff Account</h2>
+
+    <p class="text-muted">
+        Add a staff member and assign their
+        department and Supply Core access role.
+    </p>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body">
+
+        <form method="post">
+
+            {% csrf_token %}
+
+
+            {% if form.non_field_errors %}
+
+                <div class="alert alert-danger">
+
+                    {{ form.non_field_errors }}
+
+                </div>
+
+            {% endif %}
+
+
+            <div class="row">
+
+                {% for field in form %}
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+
+                            <div class="form-text">
+                                {{ field.help_text }}
+                            </div>
+
+                        {% endif %}
+
+                        {% for error in field.errors %}
+
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="alert alert-info">
+
+                The staff member will not receive
+                a temporary password.
+
+                Supply Core will send a secure link
+                allowing them to create their own password.
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Create Staff Account
+            </button>
+
+
+            <a
+                href="{% url 'user_list' %}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

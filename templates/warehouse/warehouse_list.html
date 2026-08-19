@@ -91,7 +91,8 @@
                             </td>
                             <td>{{ warehouse.capacity }}</td>
                             <td>{{ warehouse.get_status_display }}</td>
-                            <td>
+                            <td class="actions-cell">
+                                <div class="action-buttons">
                                 <a
                                     href="{% url 'warehouse_update' warehouse.id %}"
                                     class="btn btn-sm btn-outline-primary"
@@ -105,6 +106,7 @@
                                 >
                                     Delete
                                 </a>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}

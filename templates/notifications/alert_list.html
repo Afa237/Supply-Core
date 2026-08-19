@@ -1,0 +1,94 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <h2>Operational Alerts</h2>
+
+    <p class="text-muted">
+        Exceptions that require attention across Supply Core.
+    </p>
+
+</div>
+
+
+<div class="row g-3">
+
+    {% for alert in alerts %}
+
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <h5>
+                                {{ alert.title }}
+                            </h5>
+
+                            <p class="text-muted mb-2">
+                                {{ alert.message }}
+                            </p>
+
+                        </div>
+
+
+                        {% if alert.severity == "critical" %}
+
+                            <span class="badge bg-danger">
+                                Critical
+                            </span>
+
+                        {% elif alert.severity == "warning" %}
+
+                            <span class="badge bg-warning text-dark">
+                                Warning
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-info">
+                                Info
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <small class="text-muted">
+
+                        {{ alert.get_alert_type_display }}
+                        •
+                        {{ alert.created_at|date:"d M Y H:i" }}
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-success">
+
+                No active operational alerts.
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

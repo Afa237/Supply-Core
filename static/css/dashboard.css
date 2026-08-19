@@ -1,6 +1,9 @@
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
     margin: 0;
     min-height: 100%;
 }
@@ -18,41 +21,103 @@ body {
 }
 
 .main-content {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
-    display: flex;
-    flex-direction: column;
+    width: 100%;
 }
 
 .page-content {
-    flex: 1;
-    padding: 25px;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 25px;
+}
+
+.card,
+.card-body {
+    min-width: 0;
 }
 
 .card {
     border-radius: 12px;
 }
 
+/* =========================================================
+   TABLES
+   Keep normal desktop tables. If a table is wider than the
+   available screen, only the table area scrolls horizontally.
+========================================================= */
 .table-responsive {
+    display: block;
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
-.table {
+.table-responsive > .table {
     width: 100%;
-    min-width: 1000px;
+    margin-bottom: 0;
 }
 
-.table td,
-.table th {
+.table th,
+.table td {
     vertical-align: middle;
+    white-space: nowrap;
+}
+
+.table th {
+    font-size: 0.88rem;
+}
+
+.table td {
+    font-size: 0.9rem;
 }
 
 .table .btn {
     white-space: nowrap;
 }
 
+/* Actions remain separate and never overlap each other. */
+.actions-cell {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.action-buttons,
+.actions-grid,
+.action-grid,
+.table-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center;
+    gap: 6px !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+.action-buttons .btn,
+.actions-grid .btn,
+.action-grid .btn,
+.table-actions .btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    padding: 5px 9px !important;
+    position: static !important;
+    transform: none !important;
+    line-height: 1.2 !important;
+}
+
+/* =========================================================
+   FORMS
+========================================================= */
 .page-content input,
 .page-content select,
 .page-content textarea {
@@ -71,32 +136,19 @@ body {
     box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
 }
 
+/* Do not stretch Bootstrap checkboxes/radios. */
+.page-content .form-check-input {
+    width: 1em;
+    padding: 0;
+}
+
 .sidebar-overlay {
     display: none;
 }
 
-.actions-cell {
-    min-width: 140px;
-}
-
-.actions-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-    width: 100%;
-}
-
-.actions-grid .btn {
-    display: block;
-    width: 100%;
-    min-height: 36px;
-    padding: 6px 10px;
-    margin: 0;
-    position: static;
-    transform: none;
-    line-height: 1.4;
-}
-
+/* =========================================================
+   TABLET
+========================================================= */
 @media (max-width: 992px) {
     .sidebar {
         position: fixed;
@@ -143,6 +195,9 @@ body {
     }
 }
 
+/* =========================================================
+   MOBILE
+========================================================= */
 @media (max-width: 768px) {
     .top-navbar {
         padding: 12px 15px;
@@ -160,6 +215,7 @@ body {
         padding: 15px;
     }
 
+    /* Page headings and their buttons stack neatly. */
     .page-content > .d-flex {
         flex-direction: column;
         align-items: stretch !important;
@@ -170,7 +226,25 @@ body {
         flex-wrap: wrap;
     }
 
-    .actions-cell {
-        min-width: 120px;
+    .page-content > .d-flex .btn {
+        width: 100%;
+    }
+
+    /* Tables stay as tables; swipe/scroll inside this wrapper. */
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .table th,
+    .table td {
+        font-size: 0.82rem;
+    }
+
+    .action-buttons,
+    .actions-grid,
+    .action-grid,
+    .table-actions {
+        flex-wrap: nowrap !important;
     }
 }

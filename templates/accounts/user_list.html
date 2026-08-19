@@ -1,0 +1,153 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2>User Management</h2>
+
+        <p class="text-muted mb-0">
+            Manage staff accounts, departments
+            and access roles.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'user_create' %}"
+        class="btn btn-primary"
+    >
+        + Add Staff Member
+    </a>
+
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table align-middle">
+
+                <thead>
+
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Invitation</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                <div class="text-muted small">@{{ user.username }}</div>
+                            </td>
+
+                            <td>{{ user.email|default:"—" }}</td>
+
+                            <td>
+                                {% if user.profile %}
+                                    {{ user.profile.get_department_display|default:"Not assigned" }}
+                                {% else %}
+                                    Not assigned
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if user.is_superuser %}
+                                    System Administrator
+                                {% elif user.profile %}
+                                    {{ user.profile.get_role_display }}
+                                {% else %}
+                                    Viewer
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Disabled</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if user.has_usable_password %}
+                                    <span class="badge bg-success">Setup Complete</span>
+                                {% elif user.profile and user.profile.invitation_sent_at %}
+                                    <span class="badge bg-warning text-dark">Invitation Sent</span>
+                                    <div class="small text-muted mt-1">
+                                        {{ user.profile.invitation_sent_at|date:"d M Y H:i" }}
+                                    </div>
+                                {% else %}
+                                    <span class="badge bg-secondary">Not Sent</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="actions-cell">
+                                <div class="action-buttons">
+                                    <a
+                                        href="{% url 'user_update' user.id %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        Manage
+                                    </a>
+
+                                    {% if not user.has_usable_password and user.email %}
+                                        <form
+                                            method="post"
+                                            action="{% url 'resend_invitation' user.id %}"
+                                            class="m-0"
+                                        >
+                                            {% csrf_token %}
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-outline-secondary"
+                                            >
+                                                Resend Invitation
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No users found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

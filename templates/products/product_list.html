@@ -89,7 +89,8 @@
                             <td>{{ product.get_unit_display }}</td>
                             <td>{{ product.unit_price }}</td>
                             <td>{{ product.reorder_level }}</td>
-                            <td>
+                            <td class="actions-cell">
+                                <div class="action-buttons">
                                 <a
                                     href="{% url 'product_update' product.id %}"
                                     class="btn btn-sm btn-outline-primary"
@@ -103,6 +104,7 @@
                                 >
                                     Delete
                                 </a>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}

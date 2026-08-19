@@ -56,7 +56,8 @@
                             <td>{{ supplier.country }}</td>
                             <td>{{ supplier.get_status_display }}</td>
                             <td>{{ supplier.rating }}/5</td>
-                            <td>
+                            <td class="actions-cell">
+                                <div class="action-buttons">
                                 <a
                                     href="{% url 'supplier_update' supplier.id %}"
                                     class="btn btn-sm btn-outline-primary"
@@ -70,6 +71,7 @@
                                 >
                                     Delete
                                 </a>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}

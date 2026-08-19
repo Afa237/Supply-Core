@@ -80,6 +80,14 @@
                 <span>⚙️</span>
                 <span class="menu-text">Settings</span>
             </a>
+            <a href="{% url 'user_list' %}">
+                <span>👥</span>
+                <span class="menu-text">User Management</span>
+            </a>
+            <a href="{% url 'audit_log_list' %}">
+                <span>🧾</span>
+                <span class="menu-text">Audit Logs</span>
+            </a>
 
 
         {% elif request.user.profile.department == "procurement" %}

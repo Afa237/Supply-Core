@@ -9,7 +9,7 @@ from accounts.decorators import (
 
 from .forms import PurchaseOrderForm, PurchaseOrderItemForm
 from .models import PurchaseOrder, PurchaseOrderItem
-
+from audit.utils import log_action
 
 @login_required
 @department_required("procurement")
@@ -53,8 +53,13 @@ def purchase_order_create(request):
         form = PurchaseOrderForm(request.POST)
 
         if form.is_valid():
-            form.save()
-
+            purchase_order = form.save()
+            log_action(
+                request,
+                action="create",
+                obj=purchase_order,
+                description="Created purchase order.",
+                )
             messages.success(
                 request,
                 "Purchase order created successfully.",
@@ -78,6 +83,13 @@ def purchase_order_create(request):
 @department_required("procurement")
 @role_required("officer")
 def purchase_order_update(request, po_id):
+    purchase_order = form.save()
+    log_action(
+        request,
+        action="update",
+        obj=purchase_order,
+        description="Updated purchase order.",
+    )
     purchase_order = get_object_or_404(
         PurchaseOrder,
         id=po_id,
@@ -121,6 +133,13 @@ def purchase_order_delete(request, po_id):
         PurchaseOrder,
         id=po_id,
     )
+    log_action(
+        request,
+        action="delete",
+        obj=purchase_order,
+        description="Deleted purchase order.",
+    )
+    purchase_order.delete()
 
     if request.method == "POST":
         purchase_order.delete()

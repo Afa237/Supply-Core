@@ -10,7 +10,7 @@ from accounts.decorators import (
 from .forms import DriverForm, ShipmentForm, VehicleForm
 from .models import Driver, Shipment, Vehicle
 from inventory.models import Inventory,StockMovement
-
+from audit.utils import log_action
 
 @login_required
 @department_required("logistics")
@@ -53,6 +53,13 @@ def shipment_list(request):
 @department_required("logistics")
 @role_required("officer")
 def shipment_create(request):
+    purchase_order = form.save()
+    log_action(
+        request,
+        action="create",
+        obj=shipment,
+        description="Created shipment.",
+    )
     if request.method == "POST":
         form = ShipmentForm(request.POST)
 
@@ -96,7 +103,13 @@ def shipment_update(request, shipment_id):
         )
 
         if form.is_valid():
-            form.save()
+            purchase_order = form.save()
+            log_action(
+                request,
+                action="update",
+                obj=shipment,
+                description="Updated shipment.",
+                )
 
             messages.success(
                 request,
@@ -149,6 +162,12 @@ def shipment_delete(request, shipment_id):
     )
 
     if request.method == "POST":
+        log_action(
+            request,
+            action="delete",
+            obj=shipment,
+            description="deleted shipment.",
+        )
         shipment.delete()
 
         messages.success(
@@ -239,6 +258,12 @@ def vehicle_create(request):
 @login_required
 @department_required("logistics")
 def receive_shipment(request, shipment_id):
+    log_action(
+        request,
+        action="receive",
+        obj=shipment,
+        description="Received shipment into inventory.",
+        )
     shipment = get_object_or_404(
         Shipment.objects.select_related(
             "purchase_order",

@@ -71,7 +71,7 @@
     <div class="card-body">
         <div class="table-responsive">
 
-            <table class="table align-middle">
+            <table class="table align-middle ">
                 <thead>
                     <tr>
                         <th>PO Number</th>
@@ -100,7 +100,7 @@
                             </td>
                             <td>{{ po.total_amount }}</td>
                             <td>
-                                <div class="d-flex flex-column gap-2">
+                                <div class="action-buttons">
 
                                     <a
                                         href="{% url 'purchase_order_detail' po.id %}"
@@ -117,7 +117,7 @@
                                     </a>
 
                                     <a
-                                        href="{% url 'purchase_order_delete' po.id %}"class="btn btn-sm btn-outline-danger"
+                                        href="{% url 'purchase_order_delete' po.id %}" class="btn btn-sm btn-outline-danger"
                                     >
                                         Delete
                                     </a>

@@ -112,25 +112,24 @@
                             <td>{{ record.product.reorder_level }}</td>
                             <td>
                                 {% if record.is_low_stock %}
-                                    <span class="badge bg-danger">
-                                        Low Stock
-                                    </span>
+                                    <span class="badge bg-danger">Low Stock</span>
                                 {% else %}
-                                    <span class="badge bg-success">
-                                        In Stock
-                                    </span>
+                                    <span class="badge bg-success">In Stock</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="{% url 'stock_movement_create' record.id %}"
-                                        class="btn btn-sm btn-outline-success">
+                            <td class="actions-cell">
+                                <div class="action-buttons">
+                                    <a
+                                        href="{% url 'stock_movement_create' record.id %}"
+                                        class="btn btn-sm btn-outline-success"
+                                    >
                                         Movement
                                     </a>
-                                    <a href="{% url 'inventory_update' record.id %}"
-                                     class="btn btn-sm btn-outline-primary">
-                                     Edit
+                                    <a
+                                        href="{% url 'inventory_update' record.id %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        Edit
                                     </a>
                                 </div>
                             </td>

@@ -52,7 +52,7 @@
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table align-middle">
+            <table class="table align-middle ">
                 <thead>
                     <tr>
                         <th>Tracking Number</th>
@@ -76,14 +76,14 @@
                             <td><span class="badge bg-secondary">{{ shipment.get_status_display }}</span></td>
                             <td>{{ shipment.estimated_delivery_date|date:"d M Y" }}</td>
                             <td class="actions-cell">
-                                <div class="actions-grid">
+                                <div class="action-buttons">
                                     <a href="{% url 'shipment_detail' shipment.id %}"
                                        class="btn btn-sm btn-outline-dark">View</a>
                                        {% if request.user.is_superuser or request.user.profile.role != "viewer" %}
                                     <a href="{% url 'shipment_update' shipment.id %}"
                                        class="btn btn-sm btn-outline-primary">Edit</a>
                                        {% endif %}
-                                    {% if request.user.is_superuser or request.user.profile.role != "manager" or request.user.profile.role == "officer" or request.user.profile.role == "viewer" %}
+                                    {% if request.user.is_superuser or request.user.profile.role == "manager" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "admin" %}
                                     <a href="{% url 'shipment_delete' shipment.id %}"
                                        class="btn btn-sm btn-outline-danger">Delete</a>
                                     {% endif %}
