@@ -2,244 +2,1316 @@
 
 {% block content %}
 
-<div class="dashboard-header mb-4">
+<div class="dashboard-v2">
 
-    <h2>
-        Welcome,
-        {{ request.user.first_name|default:request.user.username }}
-    </h2>
+    <!-- =========================
+         HEADER
+    ========================== -->
 
-    {% if request.user.is_superuser %}
-        <p class="text-muted">
-            System-wide Supply Core overview
-        </p>
+    <div class="dashboard-hero mb-4">
+
+        <div>
+
+            <p class="dashboard-eyebrow">
+                SUPPLY CORE OVERVIEW
+            </p>
+
+            <h2 class="dashboard-title">
+                Welcome back,
+                {{ request.user.first_name|default:request.user.username }}
+            </h2>
+
+            {% if request.user.is_superuser %}
+
+                <p class="dashboard-subtitle">
+                    Monitor company-wide supply chain operations,
+                    exceptions and performance.
+                </p>
+
+            {% elif request.user.profile %}
+
+                <p class="dashboard-subtitle">
+                    {{ request.user.profile.get_department_display }}
+                    workspace and operational overview.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="dashboard-hero-actions">
+
+            <a
+                href="{% url 'alert_list' %}"
+                class="btn btn-outline-danger"
+            >
+                🔔 Alerts
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         ADMIN / FULL ACCESS
+    ========================== -->
+
+    {% if is_full_access %}
+
+        <div class="dashboard-kpi-grid">
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    📦
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Products
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_products }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Active catalogue items
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🏢
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Suppliers
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_suppliers }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Registered suppliers
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    📑
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Purchase Orders
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_purchase_orders }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Procurement records
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🚚
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Shipments
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_shipments }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Total shipment records
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🏭
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Warehouses
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_warehouses }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Storage locations
+                    </p>
+
+                </div>
+
+            </div><div class="dashboard-kpi-card dashboard-kpi-warning">
+
+                <div class="kpi-icon">
+                    ⚠️
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Low Stock
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ low_stock_count }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Items requiring attention
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🛣️
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        In Transit
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ in_transit_shipments }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Active deliveries
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card dashboard-kpi-danger">
+
+                <div class="kpi-icon">
+                    ⏱️
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Delayed Shipments
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ delayed_shipments }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Operational exceptions
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             MANAGEMENT OVERVIEW
+        ========================== -->
+
+        <div class="dashboard-section-grid mt-4">
+
+            <div class="dashboard-panel">
+
+                <div class="dashboard-panel-header">
+
+                    <div>
+
+                        <p class="dashboard-eyebrow">
+                            OPERATIONS
+                        </p>
+
+                        <h4>
+                            Supply Chain Health
+                        </h4>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-health-grid">
+
+                    <div>
+
+                        <span class="health-label">
+                            Inventory Exceptions
+                        </span>
+
+                        <strong>
+                            {{ low_stock_count }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="health-label">
+                            Shipments In Transit
+                        </span>
+
+                        <strong>
+                            {{ in_transit_shipments }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="health-label">
+                            Delayed Shipments
+                        </span>
+
+                        <strong>
+                            {{ delayed_shipments }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-panel">
+
+                <div class="dashboard-panel-header">
+
+                    <div>
+
+                        <p class="dashboard-eyebrow">
+                            QUICK ACCESS
+                        </p>
+
+                        <h4>
+                            Operational Shortcuts
+                        </h4>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-shortcuts">
+
+                    <a href="{% url 'purchase_order_list' %}">
+                        📑 Procurement
+                    </a>
+
+                    <a href="{% url 'inventory_list' %}">
+                        📦 Inventory
+                    </a>
+
+                    <a href="{% url 'shipment_list' %}">
+                        🚚 Logistics</a>
+
+                    <a href="{% url 'alert_list' %}">
+                        🔔 Alerts
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    <!-- =========================
+         PROCUREMENT
+    ========================== -->
+
+    {% elif department == "procurement" %}
+
+        <div class="dashboard-kpi-grid">
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    📑
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Purchase Orders
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_purchase_orders }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Total procurement records
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card dashboard-kpi-warning">
+
+                <div class="kpi-icon">
+                    ⏳
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Pending Orders
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ pending_purchase_orders }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Awaiting action
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🏢
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Suppliers
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_suppliers }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Registered vendors
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    📦
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Products
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_products }}
+                    </h3>
+
+                    <p class="kpi-note">
+                        Available product records
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-panel mt-4">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <p class="dashboard-eyebrow">
+                        PROCUREMENT
+                    </p>
+
+                    <h4>
+                        Recent Purchase Orders
+                    </h4>
+
+                </div>
+
+                <a
+                    href="{% url 'purchase_order_list' %}"
+                    class="btn btn-sm btn-outline-primary"
+                >
+                    View All
+                </a>
+
+            </div>
+
+
+            {% if recent_purchase_orders %}
+
+                <div class="dashboard-list">
+
+                    {% for po in recent_purchase_orders %}
+
+                        <div class="dashboard-list-item">
+
+                            <div>
+
+                                <strong>
+                                    {{ po.po_number }}
+                                </strong>
+
+                                <span>
+                                    {{ po.supplier }}
+                                </span>
+
+                            </div>
+
+                            <span class="badge bg-secondary">
+                                {{ po.get_status_display }}
+                            </span>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="text-muted mb-0">
+                    No recent purchase orders.
+                </p>{% endif %}
+
+        </div>
+
+
+    <!-- =========================
+         LOGISTICS
+    ========================== -->
+
+    {% elif department == "logistics" %}
+
+        <div class="dashboard-kpi-grid">
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🚚
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Total Shipments
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_shipments }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🛣️
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        In Transit
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ in_transit_shipments }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card dashboard-kpi-danger">
+
+                <div class="kpi-icon">
+                    ⏱️
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Delayed
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ delayed_shipments }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    ✅
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Delivered
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ delivered_shipments }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    👤
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Drivers
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_drivers }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🚛
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Vehicles
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_vehicles }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-panel mt-4">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <p class="dashboard-eyebrow">
+                        LOGISTICS
+                    </p>
+
+                    <h4>
+                        Recent Shipments
+                    </h4>
+
+                </div>
+
+                <a
+                    href="{% url 'shipment_list' %}"
+                    class="btn btn-sm btn-outline-primary"
+                >
+                    View All
+                </a>
+
+            </div>
+
+
+            {% if recent_shipments %}
+
+                <div class="dashboard-list">
+
+                    {% for shipment in recent_shipments %}
+
+                        <div class="dashboard-list-item">
+
+                            <div>
+
+                                <strong>
+                                    {{ shipment.tracking_number }}
+                                </strong>
+
+                                <span>
+                                    {{ shipment.destination_warehouse }}
+                                </span>
+
+                            </div>
+
+                            <span class="badge bg-secondary">
+                                {{ shipment.get_status_display }}
+                            </span></div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="text-muted mb-0">
+                    No recent shipments.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+    <!-- =========================
+         INVENTORY
+    ========================== -->
+
+    {% elif department == "inventory" %}
+
+        <div class="dashboard-kpi-grid">
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🏭
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Warehouses
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_warehouses }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    📦
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Inventory Records
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ inventory_records }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card dashboard-kpi-warning">
+
+                <div class="kpi-icon">
+                    ⚠️
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Low Stock
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ low_stock_count }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-panel mt-4">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <p class="dashboard-eyebrow">
+                        INVENTORY
+                    </p>
+
+                    <h4>
+                        Inventory Health
+                    </h4>
+
+                </div>
+
+                <a
+                    href="{% url 'inventory_list' %}"
+                    class="btn btn-sm btn-outline-primary"
+                >
+                    Open Inventory
+                </a>
+
+            </div>
+
+            <p class="text-muted mb-0">
+                Monitor stock levels, low-stock exceptions
+                and warehouse availability from the Inventory module.
+            </p>
+
+        </div>
+
+
+    <!-- =========================
+         WAREHOUSE
+    ========================== -->
+
+    {% elif department == "warehouse" %}
+
+        <div class="dashboard-kpi-grid">
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    🏭
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Warehouses
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ total_warehouses }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card">
+
+                <div class="kpi-icon">
+                    📦
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Inventory Records
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ inventory_records }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-kpi-card dashboard-kpi-warning">
+
+                <div class="kpi-icon">
+                    ⚠️
+                </div>
+
+                <div>
+
+                    <p class="kpi-label">
+                        Low Stock
+                    </p>
+
+                    <h3 class="kpi-value">
+                        {{ low_stock_count }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
 
     {% else %}
 
-        {% if request.user.profile %}
-            <p class="text-muted">
-                {{ request.user.profile.get_department_display }}
-                Dashboard
+        <div class="dashboard-panel">
+
+            <h4>Account Setup Incomplete
+            </h4>
+
+            <p class="text-muted mb-0">
+
+                Your account is active, but no department
+                has been assigned yet.
+
+                Please contact your Supply Core administrator.
+
             </p>
-        {% endif %}
+
+        </div>
 
     {% endif %}
 
 </div>
-
-
 {% if is_full_access %}
 
-    <div class="row g-3">
+<div class="dashboard-section-grid mt-4">
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small class="text-muted">Products</small>
-                <h3>{{ total_products }}</h3>
+    <!-- INVENTORY CHART -->
+
+    <div class="dashboard-panel">
+
+        <div class="dashboard-panel-header">
+
+            <div>
+                <p class="dashboard-eyebrow">
+                    INVENTORY
+                </p>
+
+                <h4>
+                    Inventory Health
+                </h4>
             </div>
+
         </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small class="text-muted">Suppliers</small>
-                <h3>{{ total_suppliers }}</h3>
-            </div>
-        </div>
+        <div style="position: relative; height: 280px;">
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small class="text-muted">Purchase Orders</small>
-                <h3>{{ total_purchase_orders }}</h3>
-            </div>
-        </div>
+            <canvas id="inventoryChart"></canvas>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small class="text-muted">Shipments</small>
-                <h3>{{ total_shipments }}</h3>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small class="text-muted">Warehouses</small>
-                <h3>{{ total_warehouses }}</h3>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small class="text-muted">Low Stock</small>
-                <h3>{{ low_stock_count }}</h3>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small class="text-muted">In Transit</small>
-                <h3>{{ in_transit_shipments }}</h3>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small class="text-muted">Delayed Shipments</small>
-                <h3>{{ delayed_shipments }}</h3>
-            </div>
         </div>
 
     </div>
 
 
-{% elif department == "procurement" %}
+    <!-- SHIPMENT CHART -->
 
-    <div class="row g-3">
+    <div class="dashboard-panel">
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Purchase Orders</small>
-                <h3>{{ total_purchase_orders }}</h3>
+        <div class="dashboard-panel-header">
+
+            <div>
+                <p class="dashboard-eyebrow">
+                    LOGISTICS
+                </p>
+
+                <h4>
+                    Shipment Status
+                </h4>
             </div>
+
         </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Pending</small>
-                <h3>{{ pending_purchase_orders }}</h3>
-            </div>
+        <div style="position: relative; height: 280px;">
+
+            <canvas id="shipmentChart"></canvas>
+
         </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Suppliers</small>
-                <h3>{{ total_suppliers }}</h3>
+    </div>
+
+</div>
+
+
+<div class="dashboard-section-grid mt-4">
+
+    <!-- PROCUREMENT CHART -->
+
+    <div class="dashboard-panel">
+
+        <div class="dashboard-panel-header">
+
+            <div>
+                <p class="dashboard-eyebrow">
+                    PROCUREMENT
+                </p>
+
+                <h4>
+                    Purchase Order Status
+                </h4>
             </div>
+
         </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Products</small>
-                <h3>{{ total_products }}</h3>
-            </div>
+        <div style="position: relative; height: 280px;">
+
+            <canvas id="poChart"></canvas>
+
         </div>
 
     </div>
 
 
-{% elif department == "logistics" %}
+    <!-- RECENT ACTIVITY -->
 
-    <div class="row g-3">
+    <div class="dashboard-panel">
 
-        <div class="col-lg-4 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Total Shipments</small>
-                <h3>{{ total_shipments }}</h3>
+        <div class="dashboard-panel-header">
+
+            <div>
+                <p class="dashboard-eyebrow">
+                    ACTIVITY
+                </p>
+
+                <h4>
+                    Recent Supply Chain Activity
+                </h4>
             </div>
+
+            <a
+                href="{% url 'audit_log_list' %}"
+                class="btn btn-sm btn-outline-primary"
+            >
+                View Audit Logs
+            </a>
+
         </div>
 
-        <div class="col-lg-4 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>In Transit</small>
-                <h3>{{ in_transit_shipments }}</h3>
-            </div>
-        </div>
 
-        <div class="col-lg-4 col-md-6"><div class="card border-0 shadow-sm p-3">
-                <small>Delayed</small>
-                <h3>{{ delayed_shipments }}</h3>
-            </div>
-        </div>
+        {% if recent_activity %}
 
-        <div class="col-lg-4 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Delivered</small>
-                <h3>{{ delivered_shipments }}</h3>
-            </div>
-        </div>
+            <div class="dashboard-list">
 
-        <div class="col-lg-4 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Drivers</small>
-                <h3>{{ total_drivers }}</h3>
-            </div>
-        </div>
+                {% for activity in recent_activity %}
 
-        <div class="col-lg-4 col-md-6">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Vehicles</small>
-                <h3>{{ total_vehicles }}</h3>
+                    <div class="dashboard-list-item">
+
+                        <div>
+
+                            <strong>
+
+                                {% if activity.user %}
+
+                                    {{ activity.user.get_full_name|default:activity.user.username }}
+
+                                {% else %}
+
+                                    System
+
+                                {% endif %}
+
+                            </strong>
+
+                            <span class="d-block text-muted">
+
+                                {{ activity.description|default:activity.get_action_display }}
+
+                            </span>
+
+                            <small class="text-muted">
+
+                                {{ activity.created_at|timesince }}
+                                ago
+
+                            </small>
+
+                        </div>
+
+
+                        <span class="badge bg-light text-dark">
+
+                            {{ activity.get_action_display }}
+
+                        </span>
+
+                    </div>
+
+                {% endfor %}
+
             </div>
-        </div>
+
+
+        {% else %}
+
+            <p class="text-muted mb-0">
+
+                No recent system activity.
+
+            </p>
+
+        {% endif %}
 
     </div>
 
+</div>
 
-{% elif department == "inventory" %}
+{% endif %}
+{% if is_full_access %}
 
-    <div class="row g-3">
+{{ inventory_chart_labels|json_script:"inventory-chart-labels" }}
+{{ inventory_chart_data|json_script:"inventory-chart-data" }}
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Warehouses</small>
-                <h3>{{ total_warehouses }}</h3>
-            </div>
-        </div>
+{{ shipment_chart_labels|json_script:"shipment-chart-labels" }}
+{{ shipment_chart_data|json_script:"shipment-chart-data" }}
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Inventory Records</small>
-                <h3>{{ inventory_records }}</h3>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Low Stock</small>
-                <h3>{{ low_stock_count }}</h3>
-            </div>
-        </div>
-
-    </div>
+{{ po_chart_labels|json_script:"po-chart-labels" }}
+{{ po_chart_data|json_script:"po-chart-data" }}
 
 
-{% elif department == "warehouse" %}
-
-    <div class="row g-3">
-
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Warehouses</small>
-                <h3>{{ total_warehouses }}</h3>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Inventory Records</small>
-                <h3>{{ inventory_records }}</h3>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <small>Low Stock</small>
-                <h3>{{ low_stock_count }}</h3>
-            </div>
-        </div>
-
-    </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-{% else %}
+<script>
 
-    <div class="alert alert-info">
+document.addEventListener("DOMContentLoaded", function () {
 
-        Your account is active, but you have not yet
-        been assigned to a department.
+    const inventoryLabels = JSON.parse(
+        document.getElementById(
+            "inventory-chart-labels"
+        ).textContent
+    );
 
-        Please contact your Supply Core administrator.
+    const inventoryData = JSON.parse(
+        document.getElementById(
+            "inventory-chart-data"
+        ).textContent
+    );
 
-    </div>
+
+    const shipmentLabels = JSON.parse(
+        document.getElementById(
+            "shipment-chart-labels"
+        ).textContent
+    );
+
+    const shipmentData = JSON.parse(
+        document.getElementById(
+            "shipment-chart-data"
+        ).textContent
+    );
+
+
+    const poLabels = JSON.parse(
+        document.getElementById(
+            "po-chart-labels"
+        ).textContent
+    );
+
+    const poData = JSON.parse(
+        document.getElementById(
+            "po-chart-data"
+        ).textContent
+    );
+
+
+    /* INVENTORY */
+
+    new Chart(
+        document.getElementById(
+            "inventoryChart"
+        ),
+        {
+            type: "doughnut",
+
+            data: {
+                labels: inventoryLabels,
+
+                datasets: [
+                    {
+                        data: inventoryData
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        }
+    );
+
+
+    /* SHIPMENTS */
+
+    new Chart(
+        document.getElementById(
+            "shipmentChart"
+        ),
+        {
+            type: "bar",
+
+            data: {
+                labels: shipmentLabels,
+
+                datasets: [
+                    {
+                        label: "Shipments",
+                        data: shipmentData
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        }
+    );
+
+
+    /* PURCHASE ORDERS */
+
+    new Chart(
+        document.getElementById(
+            "poChart"
+        ),
+        {
+            type: "bar",
+
+            data: {
+                labels: poLabels,
+
+                datasets: [
+                    {
+                        label: "Purchase Orders",
+                        data: poData
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        }
+    );
+
+});
+
+</script>
 
 {% endif %}
 

@@ -7,6 +7,12 @@ from procurement.models import PurchaseOrder
 from products.models import Product
 from suppliers.models import Supplier
 from warehouse.models import Warehouse
+from django.db.models import Count
+
+from audit.models import AuditLog
+from inventory.models import Inventory
+from logistics.models import Shipment
+from procurement.models import PurchaseOrder
 
 
 @login_required
@@ -31,10 +37,14 @@ def home(request):
         if profile
         else ""
     )
+    recent_activity = AuditLog.objects.select_related(
+        "user"
+    ).all()[:8]
 
     context = {
         "department": department,
         "is_full_access": is_full_access,
+        "recent_activity": recent_activity,
     }
 
 
@@ -75,6 +85,62 @@ def home(request):
                 ).count(),
 
         })
+        
+        # Inventory chart
+        low_stock_total = Inventory.objects.filter(
+            quantity__lte=10
+        ).count()
+
+        healthy_stock_total = (
+            Inventory.objects.count()
+            - low_stock_total
+        )
+
+        context["inventory_chart_labels"] = [
+            "Healthy Stock",
+            "Low Stock",
+        ]
+
+        context["inventory_chart_data"] = [
+            healthy_stock_total,
+            low_stock_total,
+        ]
+
+
+        # Shipment chart
+        shipment_status_data = (
+            Shipment.objects.values("status")
+            .annotate(total=Count("id"))
+            .order_by()
+        )
+
+        context["shipment_chart_labels"] = [
+            item["status"].replace("_", " ").title()
+            for item in shipment_status_data
+        ]
+
+        context["shipment_chart_data"] = [
+            item["total"]
+            for item in shipment_status_data
+        ]
+
+
+        # Procurement chart
+        po_status_data = (
+            PurchaseOrder.objects.values("status")
+            .annotate(total=Count("id"))
+            .order_by()
+        )
+
+        context["po_chart_labels"] = [
+            item["status"].replace("_", " ").title()
+            for item in po_status_data
+        ]
+
+        context["po_chart_data"] = [
+            item["total"]
+            for item in po_status_data
+        ]
 
 
     # PROCUREMENT

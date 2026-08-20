@@ -1,0 +1,92 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <p class="dashboard-eyebrow mb-1">
+        CUSTOMER DISPATCH
+    </p>
+
+    <h2 class="mb-1">
+        Record Dispatch
+    </h2>
+
+    <p class="text-muted mb-0">
+        Dispatch inventory to
+        <strong>{{ customer.name }}</strong>.
+    </p>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body">
+
+        <div class="alert alert-info">
+
+            Recording this transaction will automatically
+            reduce the selected inventory quantity and
+            create a Stock Out movement.
+
+        </div>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+
+            {% for field in form %}
+
+                <div class="mb-3">
+
+                    <label
+                        for="{{ field.id_for_label }}"
+                        class="form-label"
+                    >
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% for error in field.errors %}
+
+                        <div class="text-danger small mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+
+            <div class="d-flex gap-2">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Record Dispatch
+                </button>
+
+
+                <a
+                    href="{% url 'customer_detail' customer.id %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -32,6 +32,9 @@ class Inventory(models.Model):
     @property
     def is_low_stock(self):
         return self.quantity <= self.product.reorder_level
+    @property
+    def is_stock_value(self):
+        return self.quantity * self.product.unit_price
 
 
 class StockMovement(models.Model):

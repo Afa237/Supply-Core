@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
     'audit.apps.AuditConfig',
+    'customers.apps.CustomersConfig',
     'dashboard',
     'suppliers',
     'products',

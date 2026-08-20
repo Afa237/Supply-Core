@@ -88,6 +88,12 @@
                 <span>🧾</span>
                 <span class="menu-text">Audit Logs</span>
             </a>
+            <a href="{% url 'customer_list' %}">
+                <span>👥</span>
+                <span class="menu-text">
+                    Customers
+                </span>
+            </a>
 
 
         {% elif request.user.profile.department == "procurement" %}

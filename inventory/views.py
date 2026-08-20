@@ -1,6 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Q
+from django.db.models import (
+    DecimalField,
+    ExpressionWrapper,
+    F,
+    Q,
+    Sum,
+    )
 from django.shortcuts import get_object_or_404, redirect, render
 from warehouse.models import Warehouse
 from accounts.decorators import (
@@ -23,6 +29,26 @@ def inventory_list(request):
     inventory_records = Inventory.objects.select_related(
         "product",
         "warehouse",
+    )
+    inventory_value_data = (
+        Inventory.objects
+        .select_related("product")
+        .annotate(
+            calculated_value=ExpressionWrapper(
+                F("quantity") * F("product__unit_price"),
+                output_field=DecimalField(
+                    max_digits=18,
+                    decimal_places=2,
+                ),
+            )
+        )
+        .aggregate(
+            total=Sum("calculated_value")
+        )
+    )
+
+    total_inventory_value = (
+        inventory_value_data["total"] or 0
     )
 
     warehouses = Warehouse.objects.all()
@@ -51,7 +77,7 @@ def inventory_list(request):
         ]
 
     low_stock_items = Inventory.objects.filter(
-        quantity__lte=10
+        quantity__lte=F("product__reorder_level")
     )
 
     for item in low_stock_items:
@@ -69,7 +95,7 @@ def inventory_list(request):
             source_object_id=item.id,
             metadata={
                 "quantity": item.quantity,
-                "reorder_level": 10,
+                "reorder_level": item.product.reorder_level,
                 "warehouse": item.warehouse.name,
             },
         )
@@ -83,6 +109,7 @@ def inventory_list(request):
             "query": query,
             "selected_warehouse": warehouse_id,
             "selected_status": stock_status,
+            "total_inventory_value": total_inventory_value,
         },
     )
 
@@ -191,8 +218,8 @@ def stock_movement_create(request, inventory_id):
                 inventory.quantity = movement.quantity
 
             inventory.save()
-            if inventory.quantity > 10:
-                resolve_inventory_alerts(inventory)
+            if inventory.quantity > inventory.product.reorder_level:
+                resolve_inventory_alert(inventory)
             movement.save()
 
             messages.success(
