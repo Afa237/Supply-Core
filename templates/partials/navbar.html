@@ -23,14 +23,15 @@
 
     <div class="navbar-right">
 
-        <a
-            href="{% url 'alert_list' %}"
-            class="nav-icon-btn text-decoration-none"
-            title="Operational Alerts"
-        >
+        <a href="{% url 'alert_list' %}" class="nav-icon-btn text-decoration-none position-relative" title="Operational Alerts">
             🔔
+            {% if active_alert_count > 0 %}
+            <span 
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ active_alert_count }}
+            </span>
+            {% endif %}
         </a>
-
 
         <div class="user-info">
 

@@ -11,6 +11,14 @@ from .forms import DriverForm, ShipmentForm, VehicleForm
 from .models import Driver, Shipment, Vehicle
 from inventory.models import Inventory,StockMovement
 from audit.utils import log_action
+from django.utils import timezone
+from notifications.services import (
+    create_alert,
+    resolve_shipment_alert,
+)
+
+
+
 
 @login_required
 @department_required("logistics")
@@ -37,6 +45,33 @@ def shipment_list(request):
     if status:
         shipments = shipments.filter(status=status)
 
+    today = timezone.localdate()
+    delayed_shipments = Shipment.objects.filter(
+        estimated_delivery_date__lt=today
+    ).exclude(
+        status__in=["delivered", "cancelled"]
+    )
+
+    for shipment in delayed_shipments:
+        create_alert(
+            alert_type="shipment_delay",
+            title=f"Delayed shipment: {shipment.tracking_number}",
+            message=(
+                f"Shipment {shipment.tracking_number} was expected "
+                f"on {shipment.estimated_delivery_date} but has not "
+                f"been delivered."
+            ),
+            severity="critical",
+            department="logistics",
+            source_model="Shipment",
+            source_object_id=shipment.id,
+            metadata={
+                "tracking_number": shipment.tracking_number,
+                "expected_delivery": str(shipment.estimated_delivery_date),
+                "status": shipment.status,
+            },
+        )
+
     return render(
         request,
         "logistics/shipment_list.html",
@@ -53,13 +88,6 @@ def shipment_list(request):
 @department_required("logistics")
 @role_required("officer")
 def shipment_create(request):
-    purchase_order = form.save()
-    log_action(
-        request,
-        action="create",
-        obj=shipment,
-        description="Created shipment.",
-    )
     if request.method == "POST":
         form = ShipmentForm(request.POST)
 
@@ -67,6 +95,12 @@ def shipment_create(request):
             shipment = form.save(commit=False)
             shipment.created_by = request.user
             shipment.save()
+            log_action(
+                request,
+                action="create",
+                obj=shipment,
+                description="Created shipment.",
+            )
 
             messages.success(
                 request,
@@ -103,7 +137,11 @@ def shipment_update(request, shipment_id):
         )
 
         if form.is_valid():
-            purchase_order = form.save()
+            shipment = form.save()
+            if shipment.status == "delivered":
+                resolve_shipment_alert(shipment)
+                if shipment.status in ["delivered", "cancelled"]:
+                    resolve_shipment_alert(shipment)
             log_action(
                 request,
                 action="update",
@@ -258,12 +296,6 @@ def vehicle_create(request):
 @login_required
 @department_required("logistics")
 def receive_shipment(request, shipment_id):
-    log_action(
-        request,
-        action="receive",
-        obj=shipment,
-        description="Received shipment into inventory.",
-        )
     shipment = get_object_or_404(
         Shipment.objects.select_related(
             "purchase_order",
@@ -318,6 +350,12 @@ def receive_shipment(request, shipment_id):
 
         shipment.inventory_received = True
         shipment.save(update_fields=["inventory_received"])
+        log_action(
+            request,
+            action="receive",
+            obj=shipment,
+            description="Received shipment into inventory.",
+        )
 
         messages.success(
             request,

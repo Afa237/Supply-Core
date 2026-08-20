@@ -10,6 +10,11 @@ from accounts.decorators import (
 from .forms import PurchaseOrderForm, PurchaseOrderItemForm
 from .models import PurchaseOrder, PurchaseOrderItem
 from audit.utils import log_action
+from django.utils import timezone
+from notifications.services import (
+    create_alert,
+    resolve_purchase_order_alert,
+)
 
 @login_required
 @department_required("procurement")
@@ -31,6 +36,37 @@ def purchase_order_list(request):
     if status:
         purchase_orders = purchase_orders.filter(
             status=status
+        )
+    today = timezone.localdate()
+
+    overdue_orders = PurchaseOrder.objects.filter(
+        expected_delivery__lt=today
+    ).exclude(
+        status__in=["received", "cancelled"]
+    )
+
+    for purchase_order in overdue_orders:
+        create_alert(
+            alert_type="overdue_po",
+            title=f"Overdue PO: {purchase_order.po_number}",
+            message=(
+                f"Purchase order {purchase_order.po_number} "
+                f"was expected on "
+                f"{purchase_order.expected_delivery} "
+                f"but has not been received."
+            ),
+            severity="warning",
+            department="procurement",
+            source_model="PurchaseOrder",
+            source_object_id=purchase_order.id,
+            metadata={
+                "po_number": purchase_order.po_number,
+                "supplier": str(purchase_order.supplier),
+                "expected_delivery": str(
+                    purchase_order.expected_delivery
+                ),
+                "status": purchase_order.status,
+            },
         )
 
     return render(
@@ -54,6 +90,8 @@ def purchase_order_create(request):
 
         if form.is_valid():
             purchase_order = form.save()
+            if purchase_order.status in ["received", "cancelled"]:
+                resolve_purchase_order_alert(purchase_order)
             log_action(
                 request,
                 action="create",

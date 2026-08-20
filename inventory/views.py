@@ -9,7 +9,10 @@ from accounts.decorators import (
 )
 from .forms import InventoryForm, StockMovementForm
 from .models import Inventory, StockMovement
-from notifications.services import create_alert
+from notifications.services import (
+    create_alert,
+    resolve_inventory_alert,
+)
 from django.db import models
 
 
@@ -188,6 +191,8 @@ def stock_movement_create(request, inventory_id):
                 inventory.quantity = movement.quantity
 
             inventory.save()
+            if inventory.quantity > 10:
+                resolve_inventory_alerts(inventory)
             movement.save()
 
             messages.success(
