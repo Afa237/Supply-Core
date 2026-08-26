@@ -1,0 +1,621 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <p class="dashboard-eyebrow mb-1">
+        MANAGEMENT INTELLIGENCE
+    </p>
+
+    <h2 class="mb-1">
+        Reports & Analytics
+    </h2>
+
+    <p class="text-muted mb-0">
+        Review operational performance across
+        inventory, procurement, logistics and customers.
+    </p>
+
+</div>
+
+
+<!-- DATE FILTER -->
+
+<form
+    method="get"
+    class="card border-0 shadow-sm mb-4"
+>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            <div class="col-md-4">
+
+                <label class="form-label">
+                    Date From
+                </label>
+
+                <input
+                    type="date"
+                    name="date_from"
+                    value="{{ date_from }}"
+                    class="form-control"
+                >
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <label class="form-label">
+                    Date To
+                </label>
+
+                <input
+                    type="date"
+                    name="date_to"
+                    value="{{ date_to }}"
+                    class="form-control"
+                >
+
+            </div>
+
+
+            <div class="col-md-2 d-flex align-items-end">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary w-100"
+                >
+                    Generate
+                </button>
+
+            </div>
+
+
+            <div class="col-md-2 d-flex align-items-end">
+
+                <a
+                    href="{% url 'reports_dashboard' %}"
+                    class="btn btn-outline-secondary w-100"
+                >
+                    Reset
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+<!-- REPORT EXPORT BUTTONS -->
+
+<div class="d-flex justify-content-end gap-2 mb-4">
+
+    <a
+        href="{% url 'reports_export_csv' %}?date_from={{ date_from }}&date_to={{ date_to }}"
+        class="btn btn-outline-secondary"
+    >
+        ⬇ Export CSV
+    </a>
+
+    <a
+        href="{% url 'reports_export_pdf' %}?date_from={{ date_from }}&date_to={{ date_to }}"
+        class="btn btn-danger"
+        target="_blank"
+    >
+        📄 Export PDF
+    </a>
+
+</div>
+
+
+<!-- KPI CARDS -->
+
+<div class="dashboard-kpi-grid mb-4">
+
+    <div class="dashboard-kpi-card">
+
+        <div class="kpi-icon">
+            💰
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Current Stock Value
+            </p>
+
+            <h3 class="kpi-value">
+                FCFA {{ current_inventory_value|floatformat:0 }}
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-kpi-card">
+
+        <div class="kpi-icon">
+            📥
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Stock Received Value
+            </p>
+
+            <h3 class="kpi-value">
+                FCFA {{ stock_in_value|floatformat:0 }}
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-kpi-card dashboard-kpi-warning">
+
+        <div class="kpi-icon">
+            📤
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Stock Issued Value
+            </p>
+
+            <h3 class="kpi-value">
+                FCFA {{ stock_out_value|floatformat:0 }}
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-kpi-card dashboard-kpi-danger">
+
+        <div class="kpi-icon">
+            ⚠️
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Low Stock Items
+            </p>
+
+            <h3 class="kpi-value">
+                {{ low_stock_count }}
+            </h3>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="dashboard-kpi-grid mb-4">
+
+    <div class="dashboard-kpi-card">
+
+        <div class="kpi-icon">
+            📑
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Purchase Orders
+            </p>
+
+            <h3 class="kpi-value">
+                {{ po_total }}
+            </h3>
+
+            <p class="kpi-note">
+                FCFA {{ po_value|floatformat:0 }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-kpi-card">
+
+        <div class="kpi-icon">
+            🚚
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Shipments
+            </p>
+
+            <h3 class="kpi-value">
+                {{ shipment_total }}
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-kpi-card"><div class="kpi-icon">
+            👥
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Customer Dispatches
+            </p>
+
+            <h3 class="kpi-value">
+                {{ total_customer_dispatches }}
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-kpi-card">
+
+        <div class="kpi-icon">
+            📦
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Quantity Supplied
+            </p>
+
+            <h3 class="kpi-value">
+                {{ total_quantity_supplied }}
+            </h3>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- CHARTS -->
+
+<div class="dashboard-section-grid mb-4">
+
+    <div class="dashboard-panel">
+
+        <div class="dashboard-panel-header">
+
+            <div>
+
+                <p class="dashboard-eyebrow">
+                    PROCUREMENT
+                </p>
+
+                <h4>
+                    Purchase Order Status
+                </h4>
+
+            </div>
+
+        </div>
+
+        <div style="height: 300px;">
+
+            <canvas id="poReportChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-panel">
+
+        <div class="dashboard-panel-header">
+
+            <div>
+
+                <p class="dashboard-eyebrow">
+                    LOGISTICS
+                </p>
+
+                <h4>
+                    Shipment Performance
+                </h4>
+
+            </div>
+
+        </div>
+
+        <div style="height: 300px;">
+
+            <canvas id="shipmentReportChart"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- LOGISTICS SUMMARY -->
+
+<div class="dashboard-panel mb-4">
+
+    <div class="dashboard-panel-header">
+
+        <div>
+
+            <p class="dashboard-eyebrow">
+                LOGISTICS HEALTH
+            </p>
+
+            <h4>
+                Shipment Summary
+            </h4>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-health-grid">
+
+        <div>
+
+            <span class="health-label">
+                Delivered
+            </span>
+
+            <strong>
+                {{ delivered_shipments }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span class="health-label">
+                In Transit
+            </span>
+
+            <strong>
+                {{ in_transit_shipments }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span class="health-label">
+                Delayed
+            </span>
+
+            <strong>
+                {{ delayed_shipments }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- TOP CUSTOMERS -->
+
+<div class="dashboard-panel">
+
+    <div class="dashboard-panel-header">
+
+        <div>
+
+            <p class="dashboard-eyebrow">
+                CUSTOMER PERFORMANCE
+            </p>
+
+            <h4>
+                Top Customers
+            </h4>
+
+        </div>
+
+    </div>
+
+
+    {% if top_customers %}
+
+        <div class="table-responsive">
+
+            <table class="table align-middle">
+
+                <thead>
+
+                    <tr>
+                        <th>Customer</th>
+                        <th>Transactions</th>
+                        <th>Quantity Supplied</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for customer in top_customers %}
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    {{ customer.customer__name }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                {{ customer.transaction_count }}
+                            </td>
+
+                            <td>
+                                {{ customer.total_quantity }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p class="text-muted mb-0">
+            No customer activity available for
+            the selected period.</p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- CHART DATA -->
+
+{{ po_chart_labels|json_script:"report-po-labels" }}
+{{ po_chart_data|json_script:"report-po-data" }}
+
+{{ shipment_chart_labels|json_script:"report-shipment-labels" }}
+{{ shipment_chart_data|json_script:"report-shipment-data" }}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const poLabels = JSON.parse(
+            document.getElementById(
+                "report-po-labels"
+            ).textContent
+        );
+
+        const poData = JSON.parse(
+            document.getElementById(
+                "report-po-data"
+            ).textContent
+        );
+
+
+        new Chart(
+            document.getElementById(
+                "poReportChart"
+            ),
+            {
+                type: "bar",
+
+                data: {
+                    labels: poLabels,
+
+                    datasets: [
+                        {
+                            label: "Purchase Orders",
+                            data: poData
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        );
+
+
+        const shipmentLabels = JSON.parse(
+            document.getElementById(
+                "report-shipment-labels"
+            ).textContent
+        );
+
+        const shipmentData = JSON.parse(
+            document.getElementById(
+                "report-shipment-data"
+            ).textContent
+        );
+
+
+        new Chart(
+            document.getElementById(
+                "shipmentReportChart"
+            ),
+            {
+                type: "doughnut",
+
+                data: {
+                    labels: shipmentLabels,
+
+                    datasets: [
+                        {
+                            data: shipmentData
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: {
+                            position: "bottom"
+                        }
+                    }
+                }
+            }
+        );
+
+    }
+);
+
+</script>
+
+{% endblock %}

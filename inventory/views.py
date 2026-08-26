@@ -20,6 +20,8 @@ from notifications.services import (
     resolve_inventory_alert,
 )
 from django.db import models
+from django.db.models.functions import TruncMonth
+
 
 
 @login_required
@@ -50,8 +52,107 @@ def inventory_list(request):
     total_inventory_value = (
         inventory_value_data["total"] or 0
     )
+    
+    stock_in_value_data = (
+        StockMovement.objects
+        .filter(movement_type="stock_in")
+        .annotate(
+            movement_value=ExpressionWrapper(
+                F("quantity")
+                * F("inventory__product__unit_price"),
+                output_field=DecimalField(
+                    max_digits=18,
+                    decimal_places=2,
+                ),
+            )
+        )
+        .aggregate(
+            total=Sum("movement_value")
+        )
+    )
 
+    stock_in_value = (
+        stock_in_value_data["total"]
+        or 0
+    )
+    stock_out_value_data = (
+        StockMovement.objects
+        .filter(movement_type="stock_out")
+        .annotate(
+            movement_value=ExpressionWrapper(
+                F("quantity")
+                * F("inventory__product__unit_price"),
+                output_field=DecimalField(
+                    max_digits=18,
+                    decimal_places=2,
+                ),
+            )
+        )
+        .aggregate(
+            total=Sum("movement_value")
+        )
+    )
+
+    stock_out_value = (
+        stock_out_value_data["total"]
+        or 0
+    )
+    current_units = (
+        Inventory.objects.aggregate(
+            total=Sum("quantity")
+        )["total"]
+        or 0
+    )
     warehouses = Warehouse.objects.all()
+
+    warehouse_values = (
+        Inventory.objects
+        .values("warehouse__id", "warehouse__name")
+        .annotate(
+            total_value=Sum(
+                ExpressionWrapper(
+                    F("quantity") * F("product__unit_price"),
+                    output_field=DecimalField(
+                        max_digits=18,
+                        decimal_places=2,
+                    ),
+                )
+            )
+        )
+        .order_by("-total_value")
+    )
+
+    movement_data = (
+        StockMovement.objects
+        .annotate(month=TruncMonth("created_at"))
+        .values("month", "movement_type")
+        .annotate(total_quantity=Sum("quantity"))
+        .order_by("month")
+    )
+    movement_months = sorted(
+        {item["month"] for item in movement_data if item["month"]}
+    )
+    movement_chart_labels = [
+        month.strftime("%b %Y") for month in movement_months
+    ]
+    movement_chart_stock_in = [
+        sum(
+            item["total_quantity"]
+            for item in movement_data
+            if item["month"] == month
+            and item["movement_type"] == "stock_in"
+        )
+        for month in movement_months
+    ]
+    movement_chart_stock_out = [
+        sum(
+            item["total_quantity"]
+            for item in movement_data
+            if item["month"] == month
+            and item["movement_type"] == "stock_out"
+        )
+        for month in movement_months
+    ]
 
     query = request.GET.get("q", "")
     warehouse_id = request.GET.get("warehouse", "")
@@ -110,6 +211,13 @@ def inventory_list(request):
             "selected_warehouse": warehouse_id,
             "selected_status": stock_status,
             "total_inventory_value": total_inventory_value,
+            "stock_in_value": stock_in_value,
+            "stock_out_value": stock_out_value,
+            "current_units": current_units,
+            "warehouse_values": warehouse_values,
+            "movement_chart_labels": movement_chart_labels,
+            "movement_chart_stock_in": movement_chart_stock_in,
+            "movement_chart_stock_out": movement_chart_stock_out,
         },
     )
 
@@ -143,7 +251,7 @@ def inventory_create(request):
 
 @login_required
 @department_required("inventory")
-@role_required("officer")
+@role_required("manager")
 def inventory_update(request, inventory_id):
     inventory = get_object_or_404(
         Inventory,
@@ -178,7 +286,7 @@ def inventory_update(request, inventory_id):
 
 @login_required
 @department_required("inventory")
-@role_required("officer")
+@role_required("manager")
 def stock_movement_create(request, inventory_id):
     inventory = get_object_or_404(
         Inventory,

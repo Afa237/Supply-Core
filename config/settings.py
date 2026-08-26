@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'audit.apps.AuditConfig',
     'customers.apps.CustomersConfig',
+    'reports.apps.ReportsConfig',
     'dashboard',
     'suppliers',
     'products',
@@ -48,7 +49,6 @@ INSTALLED_APPS = [
     'inventory',
     'warehouse',
     'logistics',
-    'reports',
     'notifications',
     'company',
 ]

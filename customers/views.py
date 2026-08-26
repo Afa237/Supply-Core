@@ -1,24 +1,24 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Count, Q
 from django.shortcuts import (
     get_object_or_404,
     redirect,
     render,
 )
-from .forms import CustomerForm
-from .models import Customer
-from django.db import transaction
 
 from inventory.models import StockMovement
 from notifications.services import (
     create_alert,
     resolve_inventory_alert,
 )
+
 from .forms import (
     CustomerForm,
     CustomerTransactionForm,
 )
+
 from .models import (
     Customer,
     CustomerTransaction,
@@ -27,7 +27,12 @@ from .models import (
 @login_required
 def customer_list(request):
 
-    customers = Customer.objects.all()
+    customers = Customer.objects.annotate(
+        transaction_count=Count(
+            "transactions",
+            distinct=True,
+        )
+    )
 
     query = request.GET.get(
         "q",
@@ -44,6 +49,28 @@ def customer_list(request):
         "",
     )
 
+    city = request.GET.get(
+        "city",
+        "",
+    )
+
+    date_from = request.GET.get(
+        "date_from",
+        "",
+    )
+
+    date_to = request.GET.get(
+        "date_to",
+        "",
+    )
+
+    frequent = request.GET.get(
+        "frequent",
+        "",
+    )
+
+
+    # GENERAL SEARCH
     if query:
 
         customers = customers.filter(
@@ -51,30 +78,105 @@ def customer_list(request):
             | Q(contact_person__icontains=query)
             | Q(phone__icontains=query)
             | Q(email__icontains=query)
+            | Q(city__icontains=query)
         )
 
+
+    # STATUS
     if status:
+
         customers = customers.filter(
             status=status
         )
 
+
+    # CUSTOMER TYPE
     if customer_type:
+
         customers = customers.filter(
             customer_type=customer_type
         )
+
+
+    # CITY
+    if city:
+
+        customers = customers.filter(
+            city__iexact=city
+        )
+
+
+    # CUSTOMER SINCE - FROM
+    if date_from:
+
+        customers = customers.filter(
+            created_at__date__gte=date_from
+        )
+
+
+    # CUSTOMER SINCE - TO
+    if date_to:
+
+        customers = customers.filter(
+            created_at__date__lte=date_to
+        )
+
+
+    # FREQUENT CUSTOMERS
+    # For now: 5 or more transactions
+    if frequent == "yes":
+
+        customers = customers.filter(
+            transaction_count__gte=5
+        )
+
+
+    cities = (
+        Customer.objects
+        .exclude(city="")
+        .values_list(
+            "city",
+            flat=True,
+        )
+        .distinct()
+        .order_by("city")
+    )
+
 
     return render(
         request,
         "customers/customer_list.html",
         {
             "customers": customers,
+
             "query": query,
-            "selected_status": status,
-            "selected_type": customer_type,
+
+            "selected_status":
+                status,
+
+            "selected_type":
+                customer_type,
+
+            "selected_city":
+                city,
+
+            "selected_date_from":
+                date_from,
+
+            "selected_date_to":
+                date_to,
+
+            "selected_frequent":
+                frequent,
+
             "status_choices":
                 Customer.STATUS_CHOICES,
+
             "type_choices":
                 Customer.CUSTOMER_TYPE_CHOICES,
+
+            "cities":
+                cities,
         },
     )
 

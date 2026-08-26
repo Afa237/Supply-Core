@@ -16,7 +16,9 @@ from notifications.services import (
     create_alert,
     resolve_shipment_alert,
 )
-
+from warehouse.models import Warehouse
+from procurement.models import PurchaseOrder
+from notifications.models import Alert
 
 
 
@@ -24,6 +26,7 @@ from notifications.services import (
 @department_required("logistics")
 @role_required("viewer")
 def shipment_list(request):
+
     shipments = Shipment.objects.select_related(
         "purchase_order",
         "destination_warehouse",
@@ -31,92 +34,337 @@ def shipment_list(request):
         "vehicle",
     )
 
-    query = request.GET.get("q", "")
-    status = request.GET.get("status", "")
+    query = request.GET.get(
+        "q",
+        "",
+    ).strip()
 
+    status = request.GET.get(
+        "status",
+        "",
+    )
+
+    driver_id = request.GET.get(
+        "driver",
+        "",
+    )
+
+    vehicle_id = request.GET.get(
+        "vehicle",
+        "",
+    )
+
+    warehouse_id = request.GET.get(
+        "warehouse",
+        "",
+    )
+
+    date_from = request.GET.get(
+        "date_from",
+        "",
+    )
+
+    date_to = request.GET.get(
+        "date_to",
+        "",
+    )
+
+    delayed_only = request.GET.get(
+        "delayed",
+        "",
+    )
+
+
+    # SEARCH
     if query:
+
         shipments = shipments.filter(
-            Q(tracking_number__icontains=query)
-            | Q(purchase_order__po_number__icontains=query)
-            | Q(origin__icontains=query)
-            | Q(destination_warehouse__name__icontains=query)
+            Q(
+                tracking_number__icontains=query
+            )
+            | Q(
+                purchase_order__po_number__icontains=query
+            )
+            | Q(
+                origin__icontains=query
+            )
+            | Q(
+                destination_warehouse__name__icontains=query
+            )
+            | Q(
+                driver__name__icontains=query
+            )
+            | Q(
+                vehicle__registration_number__icontains=query
+            )
         )
 
+
+    # STATUS
     if status:
-        shipments = shipments.filter(status=status)
+
+        shipments = shipments.filter(
+            status=status
+        )
+
+
+    # DRIVER
+    if driver_id:
+
+        shipments = shipments.filter(
+            driver_id=driver_id
+        )
+
+
+    # VEHICLE
+    if vehicle_id:
+
+        shipments = shipments.filter(
+            vehicle_id=vehicle_id
+        )
+
+
+    # DESTINATION WAREHOUSE
+    if warehouse_id:
+
+        shipments = shipments.filter(
+            destination_warehouse_id=warehouse_id
+        )
+
+
+    # EXPECTED DELIVERY DATE FROM
+    if date_from:
+
+        shipments = shipments.filter(
+            estimated_delivery_date__gte=date_from
+        )
+
+
+    # EXPECTED DELIVERY DATE TO
+    if date_to:
+
+        shipments = shipments.filter(
+            estimated_delivery_date__lte=date_to
+        )
+
 
     today = timezone.localdate()
+
+
+    # DELAYED ONLY FILTER
+    if delayed_only == "yes":
+
+        shipments = shipments.filter(
+            estimated_delivery_date__lt=today
+        ).exclude(
+            status__in=[
+                "delivered",
+                "cancelled",
+            ]
+        )
+
+
+    # CREATE DELAY ALERTS
     delayed_shipments = Shipment.objects.filter(
         estimated_delivery_date__lt=today
     ).exclude(
-        status__in=["delivered", "cancelled"]
+        status__in=[
+            "delivered",
+            "cancelled",
+        ]
     )
 
     for shipment in delayed_shipments:
+
         create_alert(
             alert_type="shipment_delay",
-            title=f"Delayed shipment: {shipment.tracking_number}",
+            title=(
+                f"Delayed shipment: "
+                f"{shipment.tracking_number}"
+            ),
             message=(
-                f"Shipment {shipment.tracking_number} was expected "
-                f"on {shipment.estimated_delivery_date} but has not "
-                f"been delivered."
+                f"Shipment "
+                f"{shipment.tracking_number} "
+                f"was expected on "
+                f"{shipment.estimated_delivery_date} "
+                f"but has not been delivered."
             ),
             severity="critical",
             department="logistics",
             source_model="Shipment",
             source_object_id=shipment.id,
             metadata={
-                "tracking_number": shipment.tracking_number,
-                "expected_delivery": str(shipment.estimated_delivery_date),
-                "status": shipment.status,
+                "tracking_number":
+                    shipment.tracking_number,
+
+                "expected_delivery":
+                    str(
+                        shipment.estimated_delivery_date
+                    ),
+
+                "status":
+                    shipment.status,
             },
         )
+
+
+    drivers = Driver.objects.filter(
+        active=True
+    ).order_by("name")
+
+    vehicles = Vehicle.objects.filter(
+        active=True
+    ).order_by(
+        "registration_number"
+    )
+
+    warehouses = Warehouse.objects.all().order_by(
+        "name"
+    )
+
 
     return render(
         request,
         "logistics/shipment_list.html",
         {
             "shipments": shipments,
-            "query": query,
-            "selected_status": status,
-            "status_choices": Shipment.STATUS_CHOICES,
+
+            "query":query,
+
+            "selected_status":
+                status,
+
+            "selected_driver":
+                driver_id,
+
+            "selected_vehicle":
+                vehicle_id,
+
+            "selected_warehouse":
+                warehouse_id,
+
+            "selected_date_from":
+                date_from,
+
+            "selected_date_to":
+                date_to,
+
+            "selected_delayed":
+                delayed_only,
+
+            "status_choices":
+                Shipment.STATUS_CHOICES,
+
+            "drivers":
+                drivers,
+
+            "vehicles":
+                vehicles,
+
+            "warehouses":
+                warehouses,
         },
     )
 
 
-@login_required
-@department_required("logistics")
-@role_required("officer")
+@login_required 
+@department_required("logistics") 
+@role_required("officer") 
 def shipment_create(request):
+    po_id = request.GET.get(
+        "po"
+    )
+
+    initial_data = {}
+
+    if po_id:
+
+        purchase_order = get_object_or_404(
+            PurchaseOrder,
+            id=po_id,
+        )
+
+        initial_data[
+            "purchase_order"
+        ] = purchase_order
+
+
     if request.method == "POST":
-        form = ShipmentForm(request.POST)
+
+        form = ShipmentForm(
+            request.POST
+        )
 
         if form.is_valid():
-            shipment = form.save(commit=False)
-            shipment.created_by = request.user
-            shipment.save()
-            log_action(
-                request,
-                action="create",
-                obj=shipment,
-                description="Created shipment.",
-            )
+            existing_shipment = Shipment.objects.filter(
+                purchase_order=form.cleaned_data["purchase_order"]
+            ).exists()
 
-            messages.success(
-                request,
-                "Shipment created successfully.",
-            )
+            if existing_shipment:
+                form.add_error(
+                    "purchase_order",
+                    (
+                        "A shipment already exists "
+                        "for this purchase order."
+                    ),
+                )
+            else:
+                shipment = form.save(
+                    commit=False
+                )
 
-            return redirect("shipment_list")
+                shipment.created_by = (
+                    request.user
+                )
+
+                shipment.save()
+                Alert.objects.filter(
+                    alert_type="procurement_handoff",
+                    source_model="PurchaseOrder",
+                    source_object_id=str(
+                        shipment.purchase_order.id
+                    ),
+                ).exclude(
+                    status="resolved"
+                ).update(
+                    status="resolved",
+                    resolved_at=timezone.now(),
+                )
+                log_action(
+                    request,
+                    action="create",
+                    obj=shipment,
+                    description=(
+                        "Created shipment."
+                    ),
+                    metadata={
+                        "purchase_order": shipment.purchase_order.po_number,
+                    },
+                )
+
+                messages.success(
+                    request,
+                    "Shipment created successfully.",
+                )
+
+                return redirect(
+                    "shipment_list"
+                )
+
     else:
-        form = ShipmentForm()
+
+        form = ShipmentForm(
+            initial=initial_data
+        )
+
 
     return render(
         request,
         "logistics/shipment_form.html",
         {
             "form": form,
-            "page_title": "Create Shipment",
+            "page_title":
+                "Create Shipment",
         },
     )
 
@@ -138,16 +386,14 @@ def shipment_update(request, shipment_id):
 
         if form.is_valid():
             shipment = form.save()
-            if shipment.status == "delivered":
+            if shipment.status in ["delivered", "cancelled"]:
                 resolve_shipment_alert(shipment)
-                if shipment.status in ["delivered", "cancelled"]:
-                    resolve_shipment_alert(shipment)
             log_action(
                 request,
                 action="update",
                 obj=shipment,
                 description="Updated shipment.",
-                )
+            )
 
             messages.success(
                 request,

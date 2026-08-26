@@ -4,15 +4,242 @@
 
 <div class="mb-4">
 
-    <h2>Audit Logs</h2>
+    <p class="dashboard-eyebrow mb-1">
+        SYSTEM ACTIVITY
+    </p>
 
-    <p class="text-muted">
-        Review important actions performed
+    <h2 class="mb-1">
+        Audit Logs
+    </h2>
+
+    <p class="text-muted mb-0">
+        Review and filter important actions performed
         across Supply Core.
     </p>
 
 </div>
 
+
+<!-- FILTERS -->
+
+<form
+    method="get"
+    class="card border-0 shadow-sm mb-4"
+>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            <!-- SEARCH -->
+
+            <div class="col-lg-4">
+
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="Search user, record, module or description"
+                >
+
+            </div>
+
+
+            <!-- USER -->
+
+            <div class="col-lg-2">
+
+                <select
+                    name="user"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All users
+                    </option>
+
+                    {% for user in users %}
+
+                        <option
+                            value="{{ user.id }}"
+                            {% if selected_user == user.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ user.username }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- DEPARTMENT -->
+
+            <div class="col-lg-2">
+
+                <select
+                    name="department"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All departments
+                    </option>
+
+                    {% for department in departments %}
+
+                        <option
+                            value="{{ department }}"
+                            {% if selected_department == department %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ department|title }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- ACTION -->
+
+            <div class="col-lg-2">
+
+                <select
+                    name="action"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All actions
+                    </option>
+
+                    {% for value, label in action_choices %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if selected_action == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- MODULE -->
+
+            <div class="col-lg-2">
+
+                <select
+                    name="model"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All modules
+                    </option>
+
+                    {% for model in model_names %}
+
+                        <option
+                            value="{{ model }}"
+                            {% if selected_model == model %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ model }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- DATE FROM -->
+
+            <div class="col-lg-3">
+
+                <label class="form-label small text-muted">
+                    Date from
+                </label>
+
+                <inputtype="date"
+                    name="date_from"
+                    value="{{ selected_date_from }}"
+                    class="form-control"
+                >
+
+            </div>
+
+
+            <!-- DATE TO -->
+
+            <div class="col-lg-3">
+
+                <label class="form-label small text-muted">
+                    Date to
+                </label>
+
+                <input
+                    type="date"
+                    name="date_to"
+                    value="{{ selected_date_to }}"
+                    class="form-control"
+                >
+
+            </div>
+
+
+            <!-- APPLY -->
+
+            <div class="col-lg-3 d-flex align-items-end">
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary w-100"
+                >
+                    Apply Filters
+                </button>
+
+            </div>
+
+
+            <!-- CLEAR -->
+
+            <div class="col-lg-3 d-flex align-items-end">
+
+                <a
+                    href="{% url 'audit_log_list' %}"
+                    class="btn btn-outline-secondary w-100"
+                >
+                    Clear Filters
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+<!-- AUDIT TABLE -->
 
 <div class="card border-0 shadow-sm">
 
@@ -36,6 +263,7 @@
 
                 </thead>
 
+
                 <tbody>
 
                     {% for log in logs %}
@@ -47,15 +275,39 @@
                             </td>
 
                             <td>
-                                {{ log.user.username|default:"System" }}
+
+                                {% if log.user %}
+
+                                    <strong>
+                                        {{ log.user.username }}
+                                    </strong>
+
+                                    {% if log.user.get_full_name %}
+
+                                        <div class="small text-muted">
+                                            {{ log.user.get_full_name }}
+                                        </div>
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    System
+
+                                {% endif %}
+
                             </td>
 
                             <td>
-                                {{ log.department|default:"—" }}
+                                {{ log.department|default:"—"|title }}
                             </td>
 
                             <td>
-                                {{ log.get_action_display }}
+
+                                <span class="badge bg-secondary">
+                                    {{ log.get_action_display }}
+                                </span>
+
                             </td>
 
                             <td>
@@ -78,9 +330,9 @@
 
                             <td
                                 colspan="7"
-                                class="text-center text-muted py-4"
+                                class="text-center text-muted py-5"
                             >
-                                No audit events recorded yet.
+                                No audit events match the selected filters.
                             </td>
 
                         </tr>

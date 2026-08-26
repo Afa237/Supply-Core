@@ -1,31 +1,77 @@
 {% extends "layout/dashboard_base.html" %}
-
 {% block content %}
+<div class="card-body">
 
-<h2 class="mb-4">{{ page_title }}</h2>
+    <form method="post">
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
+        {% csrf_token %}
 
-            {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label">
-                        {{ field.label }}
-                    </label>
 
-                    {{ field }}
+        <!-- NON-FIELD ERRORS -->
 
-                    {% for error in field.errors %}
-                        <div class="text-danger small mt-1">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endfor %}
+        {% if form.non_field_errors %}
 
-            <button class="btn btn-primary">
+            <div class="alert alert-danger">
+
+                {% for error in form.non_field_errors %}
+
+                    <div>
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- FORM FIELDS -->
+
+        {% for field in form %}
+
+            <div class="mb-3">
+
+                <label
+                    for="{{ field.id_for_label }}"
+                    class="form-label"
+                >
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+
+                {% if field.help_text %}
+
+                    <div class="form-text">
+                        {{ field.help_text }}
+                    </div>
+
+                {% endif %}
+
+
+                {% for error in field.errors %}
+
+                    <div class="text-danger small mt-1">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endfor %}
+
+
+        <!-- ACTION BUTTONS -->
+
+        <div class="d-flex gap-2 mt-4">
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
                 Save Inventory
             </button>
 
@@ -35,8 +81,10 @@
             >
                 Cancel
             </a>
-        </form>
-    </div>
-</div>
 
+        </div>
+
+    </form>
+
+</div>
 {% endblock %}

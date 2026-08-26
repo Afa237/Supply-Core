@@ -23,30 +23,234 @@
     {% endfor %}
 {% endif %}
 
-<form method="get" class="card border-0 shadow-sm mb-4">
+<form
+    method="get"
+    class="card border-0 shadow-sm mb-4"
+>
+
     <div class="card-body">
+
         <div class="row g-3">
-            <div class="col-md-8">
-                <input type="text" name="q" value="{{ query }}" class="form-control"
-                       placeholder="Search tracking number, PO, origin or warehouse">
+
+            <!-- SEARCH -->
+
+            <div class="col-lg-4">
+
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="Search tracking, PO, origin, driver or vehicle"
+                >
+
             </div>
 
-            <div class="col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">All statuses</option>
+
+            <!-- STATUS -->
+
+            <div class="col-lg-2">
+
+                <select
+                    name="status"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All statuses
+                    </option>
+
                     {% for value, label in status_choices %}
-                        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>
+
+                        <option
+                            value="{{ value }}"
+                            {% if selected_status == value %}
+                                selected
+                            {% endif %}
+                        >
                             {{ label }}
                         </option>
+
                     {% endfor %}
+
                 </select>
+
             </div>
 
-            <div class="col-md-1">
-                <button class="btn btn-outline-primary w-100" type="submit">Go</button>
+
+            <!-- DRIVER -->
+
+            <div class="col-lg-2">
+
+                <select
+                    name="driver"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All drivers
+                    </option>
+
+                    {% for driver in drivers %}
+
+                        <option
+                            value="{{ driver.id }}"
+                            {% if selected_driver == driver.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ driver.name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
             </div>
+
+
+            <!-- VEHICLE -->
+
+            <div class="col-lg-2">
+
+                <select
+                    name="vehicle"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All vehicles
+                    </option>
+
+                    {% for vehicle in vehicles %}
+
+                        <option
+                            value="{{ vehicle.id }}"
+                            {% if selected_vehicle == vehicle.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ vehicle.registration_number }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- DESTINATION -->
+
+            <div class="col-lg-2">
+
+                <select
+                    name="warehouse"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All destinations
+                    </option>
+
+                    {% for warehouse in warehouses %}
+
+                        <option
+                            value="{{ warehouse.id }}"
+                            {% if selected_warehouse == warehouse.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ warehouse.name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- DATE FROM -->
+
+            <div class="col-lg-3">
+
+                <label class="form-label small text-muted">
+                    Expected from
+                </label>
+
+                <input
+                    type="date"
+                    name="date_from"
+                    value="{{ selected_date_from }}"
+                    class="form-control"
+                >
+
+            </div>
+
+
+            <!-- DATE TO -->
+
+            <div class="col-lg-3"><label class="form-label small text-muted">
+                    Expected to
+                </label>
+
+                <input
+                    type="date"
+                    name="date_to"
+                    value="{{ selected_date_to }}"
+                    class="form-control"
+                >
+
+            </div>
+
+
+            <!-- DELAYED -->
+
+            <div class="col-lg-3 d-flex align-items-end">
+
+                <div class="form-check mb-2">
+
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="delayed"
+                        value="yes"
+                        id="delayedOnly"
+                        {% if selected_delayed == "yes" %}
+                            checked
+                        {% endif %}
+                    >
+
+                    <label
+                        class="form-check-label"
+                        for="delayedOnly"
+                    >
+                        Delayed shipments only
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTON -->
+
+            <div class="col-lg-3 d-flex align-items-end">
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary w-100"
+                >
+                    Apply Filters
+                </button>
+
+            </div>
+
         </div>
+
     </div>
+
 </form>
 
 <div class="card border-0 shadow-sm">

@@ -37,7 +37,7 @@
 
 <div class="row g-3 mb-4">
 
-    <div class="col-md-6 col-lg-4">
+    <div class="col-md-6 col-xl-3">
 
         <div class="dashboard-kpi-card">
 
@@ -48,7 +48,7 @@
             <div>
 
                 <p class="kpi-label">
-                    Current Inventory Value
+                    Current Stock Value
                 </p>
 
                 <h3 class="kpi-value">
@@ -56,8 +56,204 @@
                 </h3>
 
                 <p class="kpi-note">
-                    Total value of stock currently available
+                    Value of stock currently available
                 </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="dashboard-kpi-card">
+
+            <div class="kpi-icon">
+                📥
+            </div>
+
+            <div>
+
+                <p class="kpi-label">
+                    Stock Received Value
+                </p>
+
+                <h3 class="kpi-value">
+                    FCFA {{ stock_in_value|floatformat:0 }}
+                </h3>
+
+                <p class="kpi-note">
+                    Value of recorded stock-in movements
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="dashboard-kpi-card dashboard-kpi-warning">
+
+            <div class="kpi-icon">
+                📤
+            </div>
+
+            <div>
+
+                <p class="kpi-label">
+                    Stock Issued Value
+                </p>
+
+                <h3 class="kpi-value">
+                    FCFA {{ stock_out_value|floatformat:0 }}
+                </h3>
+
+                <p class="kpi-note">
+                    Value dispatched out of inventory
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="dashboard-kpi-card">
+
+            <div class="kpi-icon">
+                📦
+            </div>
+
+            <div>
+
+                <p class="kpi-label">
+                    Current Units
+                </p>
+
+                <h3 class="kpi-value">
+                    {{ current_units }}
+                </h3>
+
+                <p class="kpi-note">
+                    Total units currently in stock
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="row g-4 mb-4">
+
+    <!-- WAREHOUSE VALUATION -->
+
+    <div class="col-lg-5">
+
+        <div class="dashboard-panel h-100">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <p class="dashboard-eyebrow">
+                        WAREHOUSE VALUE
+                    </p>
+
+                    <h4>
+                        Inventory by Warehouse
+                    </h4>
+
+                </div>
+
+            </div>
+
+
+            {% if warehouse_values %}
+
+                <div class="dashboard-list">
+
+                    {% for warehouse in warehouse_values %}
+
+                        <div class="dashboard-list-item">
+
+                            <div>
+
+                                <strong>
+                                    {{ warehouse.warehouse__name }}
+                                </strong>
+
+                                <span class="d-block text-muted">
+                                    Current stock valuation
+                                </span>
+
+                            </div>
+
+
+                            <strong>
+                                FCFA
+                                {{ warehouse.total_value|floatformat:0 }}
+                            </strong>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="text-muted mb-0">
+                    No warehouse valuation data available.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- MOVEMENT CHART -->
+
+    <div class="col-lg-7">
+
+        <div class="dashboard-panel h-100">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <p class="dashboard-eyebrow">
+                        STOCK ACTIVITY
+                    </p>
+
+                    <h4>
+                        Inventory Movement Trend
+                    </h4>
+
+                </div>
+
+            </div>
+
+
+            <div
+                style="
+                    position: relative;
+                    height: 320px;
+                "
+            >
+
+                <canvas id="inventoryMovementChart"></canvas>
 
             </div>
 
@@ -310,5 +506,110 @@
     </div>
 
 </div>
+{{ movement_chart_labels|json_script:"movement-chart-labels" }}
+
+{{ movement_chart_stock_in|json_script:"movement-chart-stock-in" }}
+
+{{ movement_chart_stock_out|json_script:"movement-chart-stock-out" }}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const labels = JSON.parse(
+            document.getElementById(
+                "movement-chart-labels"
+            ).textContent
+        );
+
+        const stockIn = JSON.parse(
+            document.getElementById(
+                "movement-chart-stock-in"
+            ).textContent
+        );
+
+        const stockOut = JSON.parse(
+            document.getElementById(
+                "movement-chart-stock-out"
+            ).textContent
+        );
+
+
+        const chartElement =
+            document.getElementById(
+                "inventoryMovementChart"
+            );
+
+
+        if (chartElement) {
+
+            new Chart(
+                chartElement,
+                {
+                    type: "bar",
+
+                    data: {
+                        labels: labels,
+
+                        datasets: [
+                            {
+                                label: "Stock Received",
+                                data: stockIn
+                            },
+
+                            {
+                                label: "Stock Issued",
+                                data: stockOut
+                            }
+                        ]
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        interaction: {
+                            mode: "index",
+                            intersect: false
+                        },
+
+                        scales: {
+
+                            y: {
+                                beginAtZero: true,
+
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+
+                        },
+
+                        plugins: {
+
+                            legend: {
+                                position: "bottom"
+                            }
+
+                        }
+
+                    }
+                }
+            );
+
+        }
+
+    }
+);
+
+</script>
 
 {% endblock %}

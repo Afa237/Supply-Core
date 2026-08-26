@@ -8,6 +8,7 @@ class Alert(models.Model):
         ("low_stock", "Low Stock"),
         ("shipment_delay", "Shipment Delay"),
         ("overdue_po", "Overdue Purchase Order"),
+        ("procurement_handoff", "Procurement Handoff"),
     ]
 
     SEVERITY_CHOICES = [

@@ -1,291 +1,357 @@
 {% extends "base.html" %}
-
-{% block title %}Operational Alerts | Supply Core{% endblock %}
-
+{% block title %} Operational Alerts | Supply Core {% endblock %}
 {% block content %}
+<!-- =====================================
+     PAGE HEADER
+====================================== -->
 
-<div class="container-fluid py-4">
+<div
+    class="d-flex flex-wrap justify-content-between
+           align-items-center gap-3 mb-4"
+>
 
-    <!-- PAGE HEADER -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
 
-        <div>
-            <h2 class="mb-1">Operational Alerts</h2>
+        <h2 class="mb-1">
+            Operational Alerts
+        </h2>
 
-            <p class="text-muted mb-0">
-                Monitor and manage supply chain exceptions.
-            </p>
-        </div>
-
-        {% if active_alert_count > 0 %}
-            <span class="badge bg-danger fs-6">
-                {{ active_alert_count }} Active
-            </span>
-        {% endif %}
+        <p class="text-muted mb-0">
+            Monitor and manage supply chain exceptions.
+        </p>
 
     </div>
 
 
-    <!-- DJANGO MESSAGES -->
-    {% if messages %}
+    {% if active_alert_count > 0 %}
 
-        {% for message in messages %}
-
-            <div
-                class="alert alert-{{ message.tags|default:'info' }}
-                       alert-dismissible fade show"
-                role="alert"
-            >
-                {{ message }}
-
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-                </button>
-            </div>
-
-        {% endfor %}
+        <span class="badge bg-danger fs-6">
+            {{ active_alert_count }} Active
+        </span>
 
     {% endif %}
 
-
-    <!-- ALERT LIST -->
-    {% if alerts %}
-
-        <div class="row g-3">
-
-            {% for alert in alerts %}
-
-                <div class="col-12">
-
-                    <div class="card shadow-sm border-0">
-
-                        <div class="card-body">
-
-                            <!-- TOP SECTION -->
-                            <div
-                                class="d-flex flex-column
-                                       flex-md-row
-                                       justify-content-between
-                                       align-items-md-start
-                                       gap-3"
-                            >
-
-                                <div>
-
-                                    <!-- TITLE -->
-                                    <h5 class="card-title mb-2">
-                                        {{ alert.title }}
-                                    </h5>
+</div>
 
 
-                                    <!-- MESSAGE -->
-                                    <p class="card-text text-muted mb-3">
-                                        {{ alert.message }}
-                                    </p>
+<!-- =====================================
+     DJANGO MESSAGES
+====================================== -->
+
+{% if messages %}
+
+    {% for message in messages %}
+
+        <div
+            class="alert alert-{{ message.tags|default:'info' }}
+                   alert-dismissible fade show"
+            role="alert"
+        >
+
+            {{ message }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+            >
+            </button>
+
+        </div>
+
+    {% endfor %}
+
+{% endif %}
 
 
-                                    <!-- DEPARTMENT -->
-                                    {% if alert.department %}
+<!-- =====================================
+     ALERT LIST
+====================================== -->
 
-                                        <small class="text-muted d-block mb-1">
+{% if alerts %}
 
-                                            <strong>Department:</strong>
+    <div class="row g-3">
 
-                                            {{ alert.department|title }}
+        {% for alert in alerts %}
 
-                                        </small>
+            <div class="col-12">
 
-                                    {% endif %}
+                <div class="card shadow-sm border-0">
 
+                    <div class="card-body">
 
-                                    <!-- DATE -->
-                                    {% if alert.created_at %}
+                        <!-- =========================
+                             TOP SECTION
+                        ========================== -->
 
-                                        <small class="text-muted d-block">
+                        <div
+                            class="d-flex flex-column
+                                   flex-md-row
+                                   justify-content-between
+                                   align-items-md-start
+                                   gap-3"
+                        >
 
-                                            <strong>Created:</strong>
+                            <!-- ALERT INFORMATION -->
 
-                                            {{ alert.created_at|date:"d M Y, H:i" }}
+                            <div>
 
-                                        </small>
+                                <!-- TITLE -->
 
-                                    {% endif %}
-
-                                </div>
-
-
-                                <!-- BADGES -->
-                                <div
-                                    class="d-flex
-                                           flex-wrap
-                                           gap-2"
-                                >
-
-                                    <!-- SEVERITY -->
-
-                                    {% if alert.severity == "critical" %}
-
-                                        <span class="badge bg-danger">
-                                            Critical
-                                        </span>
-
-                                    {% elif alert.severity == "warning" %}
-
-                                        <span
-                                            class="badgebg-warning
-                                                   text-dark"
-                                        >
-                                            Warning
-                                        </span>
-
-                                    {% else %}
-
-                                        <span class="badge bg-info text-dark">
-                                            {{ alert.severity|title }}
-                                        </span>
-
-                                    {% endif %}
+                                <h5 class="card-title mb-2">
+                                    {{ alert.title }}
+                                </h5>
 
 
-                                    <!-- STATUS -->
+                                <!-- MESSAGE -->
 
-                                    {% if alert.status == "open" %}
+                                <p class="card-text text-muted mb-3">
+                                    {{ alert.message }}
+                                </p>
 
-                                        <span class="badge bg-danger">
-                                            Open
-                                        </span>
 
-                                    {% elif alert.status == "acknowledged" %}
+                                <!-- DEPARTMENT -->
 
-                                        <span class="badge bg-primary">
-                                            Acknowledged
-                                        </span>
+                                {% if alert.department %}
 
-                                    {% elif alert.status == "resolved" %}
+                                    <small
+                                        class="text-muted d-block mb-1"
+                                    >
 
-                                        <span class="badge bg-success">
-                                            Resolved
-                                        </span>
+                                        <strong>
+                                            Department:
+                                        </strong>
 
-                                    {% else %}
+                                        {{ alert.department|title }}
 
-                                        <span class="badge bg-secondary">
-                                            {{ alert.status|title }}
-                                        </span>
+                                    </small>
 
-                                    {% endif %}
+                                {% endif %}
 
-                                </div>
+
+                                <!-- CREATED DATE -->
+
+                                {% if alert.created_at %}
+
+                                    <small
+                                        class="text-muted d-block"
+                                    >
+
+                                        <strong>
+                                            Created:
+                                        </strong>
+
+                                        {{ alert.created_at|date:"d M Y, H:i" }}
+
+                                    </small>
+
+                                {% endif %}
 
                             </div>
 
 
-                            <!-- ACTION BUTTONS -->
+                            <!-- =========================
+                                 ALERT BADGES
+                            ========================== -->
 
-                            {% if alert.status != "resolved" %}
+                            <div
+                                class="d-flex flex-wrap gap-2"
+                            ><!-- SEVERITY BADGE -->
 
-                                <hr>
+                                {% if alert.severity == "critical" %}
 
-                                <div
-                                    class="d-flex
-                                           flex-wrap
-                                           gap-2"
-                                >
-
-                                    <!-- ACKNOWLEDGE -->
-
-                                    {% if alert.status == "open" %}
-
-                                        <form
-                                            method="post"
-                                            action="{% url 'acknowledge_alert' alert.id %}"
-                                        >
-
-                                            {% csrf_token %}
-
-                                            <button
-                                                type="submit"
-                                                class="btn
-                                                       btn-sm
-                                                       btn-outline-primary"
-                                            >
-                                                ✓ Acknowledge
-                                            </button>
-
-                                        </form>
-
-                                    {% endif %}
+                                    <span
+                                        class="badge bg-danger"
+                                    >
+                                        Critical
+                                    </span>
 
 
-                                    <!-- RESOLVE -->
+                                {% elif alert.severity == "warning" %}
+
+                                    <span
+                                        class="badge bg-warning text-dark"
+                                    >
+                                        Warning
+                                    </span>
+
+
+                                {% else %}
+
+                                    <span
+                                        class="badge bg-info text-dark"
+                                    >
+                                        {{ alert.severity|title }}
+                                    </span>
+
+                                {% endif %}
+
+
+                                <!-- STATUS BADGE -->
+
+                                {% if alert.status == "open" %}
+
+                                    <span
+                                        class="badge bg-danger"
+                                    >
+                                        Open
+                                    </span>
+
+
+                                {% elif alert.status == "acknowledged" %}
+
+                                    <span
+                                        class="badge bg-primary"
+                                    >
+                                        Acknowledged
+                                    </span>
+
+
+                                {% elif alert.status == "resolved" %}
+
+                                    <span
+                                        class="badge bg-success"
+                                    >
+                                        Resolved
+                                    </span>
+
+
+                                {% else %}
+
+                                    <span
+                                        class="badge bg-secondary"
+                                    >
+                                        {{ alert.status|title }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =========================
+                             ACTION BUTTONS
+                        ========================== -->
+
+                        {% if alert.status != "resolved" %}
+
+                            <hr>
+
+                            <div
+                                class="d-flex flex-wrap gap-2"
+                            >
+
+                                <!-- ACKNOWLEDGE BUTTON -->
+
+                                {% if alert.status == "open" %}
 
                                     <form
                                         method="post"
-                                        action="{% url 'resolve_alert' alert.id %}"
+                                        action="{% url 'acknowledge_alert' alert.id %}"
                                     >
 
                                         {% csrf_token %}
 
                                         <button
                                             type="submit"
-                                            class="btn
-                                                   btn-sm
-                                                   btn-success"
+                                            class="btn btn-sm
+                                                   btn-outline-primary"
                                         >
-                                            ✓ Resolve
+                                            ✓ Acknowledge
                                         </button>
 
                                     </form>
 
-                                </div>
+                                {% endif %}
 
-                            {% endif %}
 
-                        </div>
+                                <!-- RESOLVE BUTTON -->
+
+                                <form
+                                    method="post"
+                                    action="{% url 'resolve_alert' alert.id %}"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <buttontype="submit"
+                                        class="btn btn-sm btn-success"
+                                    >
+                                        ✓ Resolve
+                                    </button>
+
+                                </form>
+
+
+                                <!-- =========================
+                                     PROCUREMENT → LOGISTICS
+                                     CREATE SHIPMENT
+                                ========================== -->
+
+                                {% if alert.alert_type == "procurement_handoff" %}
+
+                                    <a
+                                        href="{% url 'shipment_create' %}?po={{ alert.source_object_id }}"
+                                        class="btn btn-sm btn-primary"
+                                    >
+                                        🚚 Create Shipment
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
 
                     </div>
 
-                </div>{% endfor %}
-
-        </div>
-
-
-    {% else %}
-
-        <!-- EMPTY STATE -->
-
-        <div class="card shadow-sm border-0">
-
-            <div class="card-body text-center py-5">
-
-                <div
-                    style="
-                        font-size: 3rem;
-                        margin-bottom: 15px;
-                    "
-                >
-                    ✅
                 </div>
-
-                <h4>
-                    No Active Alerts
-                </h4>
-
-                <p class="text-muted mb-0">
-
-                    Supply Core has not detected any
-                    active operational exceptions.
-                </p>
 
             </div>
 
+        {% endfor %}
+
+    </div>
+
+
+{% else %}
+
+    <!-- =====================================
+         EMPTY STATE
+    ====================================== -->
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body text-center py-5">
+
+            <div
+                style="
+                    font-size: 3rem;
+                    margin-bottom: 15px;
+                "
+            >
+                ✅
+            </div>
+
+
+            <h4>
+                No Active Alerts
+            </h4>
+
+
+            <p class="text-muted mb-0">
+
+                Supply Core has not detected any
+                active operational exceptions.
+
+            </p>
+
         </div>
 
-    {% endif %}
+    </div>
 
-</div>
-
+{% endif %}
 {% endblock %}
