@@ -1,186 +1,254 @@
 <aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand-wrapper">
+      <div class="brand-icon">SC</div>
 
-    <div class="sidebar-header">
-
-        <div class="brand-wrapper">
-            <div class="brand-icon">SC</div>
-
-            <div class="brand-text">
-                <h4>Supply Core</h4>
-                <span>Enterprise SCM</span>
-            </div>
-        </div>
-
-        <button
-            type="button"
-            class="sidebar-close"
-            id="sidebarClose"
-        >
-            ×
-        </button>
-
+      <div class="brand-text">
+        <h4>Supply Core</h4>
+        <span>Enterprise SCM</span>
+      </div>
     </div>
 
+    <button type="button" class="sidebar-close" id="sidebarClose">×</button>
+  </div>
 
-    <nav class="sidebar-menu">
+  <nav class="sidebar-menu">
+    <!-- =====================================
+         DASHBOARD
+    ====================================== -->
 
-        <!-- DASHBOARD -->
-        <a href="{% url 'home' %}">
-            <span>🏠</span>
-            <span class="menu-text">Dashboard</span>
-        </a>
+    <a
+      href="{% url 'home' %}"
+      class="{% if request.path == '/' %}active{% endif %}"
+    >
+      <span>🏠</span>
+      <span class="menu-text">Dashboard</span>
+    </a>
 
+    <!-- =====================================
+         FULL ACCESS
+         Superuser / Admin / SCM Manager
+    ====================================== -->
 
-        {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" %}
+    {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" %}
 
-            <!-- FULL ACCESS -->
+    <a
+      href="{% url 'product_list' %}"
+      class="{% if '/product/' in request.path %}active{% endif %}"
+    >
+      <span>📦</span>
+      <span class="menu-text">Products</span>
+    </a>
 
-            <a href="{% url 'product_list' %}"
-                class="{% if '/product/' in request.path %}active{% endif %}">
-                <span>📦</span>
-                <span class="menu-text">Products</span>
-            </a>
+    <a
+      href="{% url 'supplier_list' %}"
+      class="{% if '/supplier/' in request.path %}active{% endif %}"
+    >
+      <span>🏢</span>
+      <span class="menu-text">Suppliers</span>
+    </a>
 
-            <a href="{% url 'supplier_list' %}"
-                class="{% if '/supplier/' in request.path %}active{% endif %}">
-                <span>🏢</span>
-                <span class="menu-text">Suppliers</span>
-            </a>
+    <a
+      href="{% url 'purchase_order_list' %}"
+      class="{% if '/procurement/' in request.path %}active{% endif %}"
+    >
+      <span>📑</span>
+      <span class="menu-text">Procurement</span>
+    </a>
 
-            <a href="{% url 'purchase_order_list' %}"
-                class="{% if '/procurement/' in request.path %}active{% endif %}">
-                <span>📑</span>
-                <span class="menu-text">Procurement</span>
-            </a>
+    <a
+      href="{% url 'shipment_list' %}"
+      class="{% if '/logistics/' in request.path %}active{% endif %}"
+    >
+      <span>🚚</span>
+      <span class="menu-text">Logistics</span>
+    </a>
 
-            <a href="{% url 'inventory_list' %}"
-                class="{% if '/inventory/' in request.path %}active{% endif %}">
-                <span>📊</span>
-                <span class="menu-text">Inventory</span>
-            </a>
+    <a
+      href="{% url 'warehouse_list' %}"
+      class="{% if '/warehouse/' in request.path %}active{% endif %}"
+    >
+      <span>🏭</span>
+      <span class="menu-text">Warehouses</span>
+    </a>
 
-            <a href="{% url 'warehouse_list' %}"
-                class="{% if '/warehouse/' in request.path %}active{% endif %}">
-                <span>🏭</span>
-                <span class="menu-text">Warehouses</span>
-            </a>
+    <a
+      href="{% url 'inventory_list' %}"
+      class="{% if '/inventory/' in request.path %}active{% endif %}"
+    >
+      <span>📊</span>
+      <span class="menu-text">Inventory</span>
+    </a>
 
-            <a href="{% url 'shipment_list' %}"
-                class="{% if '/shipment/' in request.path %}active{% endif %}">
-                <span>🚚</span>
-                <span class="menu-text">Logistics</span>
-            </a>
+    <a
+      href="{% url 'customer_list' %}"
+      class="{% if '/customers/' in request.path %}active{% endif %}"
+    >
+      <span>👥</span>
+      <span class="menu-text">Customers</span>
+    </a>
 
-            <a href="{% url 'reports_dashboard' %}">
-                <span>📈</span>
-                <span class="menu-text">Reports & Analytics</span>
-            </a>
+    <a
+      href="{% url 'alert_list' %}"
+      class="{% if '/alerts/' in request.path %}active{% endif %}"
+    >
+      <span>🔔</span>
+      <span class="menu-text">Operational Alerts</span>
+    </a>
 
-            <a href="#">
-                <span>⚙️</span>
-                <span class="menu-text">Settings</span>
-            </a>
-            <a href="{% url 'user_list' %}">
-                <span>👥</span>
-                <span class="menu-text">User Management</span>
-            </a>
-            <a href="{% url 'audit_log_list' %}">
-                <span>🧾</span>
-                <span class="menu-text">Audit Logs</span>
-            </a>
-            <a href="{% url 'customer_list' %}">
-                <span>👥</span>
-                <span class="menu-text">
-                    Customers
-                </span>
-            </a>
+    <a
+      href="{% url 'reports_dashboard' %}"
+      class="{% if '/reports/' in request.path %}active{% endif %}"
+    >
+      <span>📈</span>
+      <span class="menu-text">Reports & Analytics</span>
+    </a>
 
+    <a
+      href="{% url 'audit_log_list' %}"
+      class="{% if '/audit/' in request.path %}active{% endif %}"
+    >
+      <span>🧾</span>
+      <span class="menu-text">Audit Logs</span>
+    </a>
 
-        {% elif request.user.profile.department == "procurement" %}
+    <a
+      href="{% url 'user_list' %}"
+      class="{% if '/users/' in request.path %}active{% endif %}"
+    >
+      <span>👤</span>
+      <span class="menu-text">User Management</span>
+    </a>
 
-            <!-- PROCUREMENT -->
+    <!-- =====================================
+         PROCUREMENT
+    ====================================== -->
 
-            <a href="{% url 'product_list' %}">
-                <span>📦</span>
-                <span class="menu-text">Products</span>
-            </a>
+    {% elif request.user.profile.department == "procurement" %}
 
-            <a href="{% url 'supplier_list' %}">
-                <span>🏢</span>
-                <span class="menu-text">Suppliers</span>
-            </a>
+    <a
+      href="{% url 'product_list' %}"
+      class="{% if '/product/' in request.path %}active{% endif %}"
+    >
+      <span>📦</span>
+      <span class="menu-text">Products</span>
+    </a>
 
-            <a href="{% url 'purchase_order_list' %}">
-                <span>📑</span>
-                <span class="menu-text">Procurement</span>
-            </a>
+    <a
+      href="{% url 'supplier_list' %}"
+      class="{% if '/supplier/' in request.path %}active{% endif %}"
+    >
+      <span>🏢</span>
+      <span class="menu-text">Suppliers</span>
+    </a>
 
+    <a
+      href="{% url 'purchase_order_list' %}"
+      class="{% if '/procurement/' in request.path %}active{% endif %}"
+    >
+      <span>📑</span>
+      <span class="menu-text">Procurement</span>
+    </a>
 
-        {% elif request.user.profile.department == "logistics" %}
+    <a href="{% url 'alert_list' %}">
+      <span>🔔</span>
+      <span class="menu-text">Alerts</span>
+    </a>
 
-            <!-- LOGISTICS -->
+    <!-- =====================================
+         LOGISTICS
+    ====================================== -->
 
-            <a href="{% url 'shipment_list' %}">
-                <span>🚚</span>
-                <span class="menu-text">Shipments</span>
-            </a>
+    {% elif request.user.profile.department == "logistics" %}
 
-            <a href="{% url 'driver_list' %}">
-                <span>👤</span>
-                <span class="menu-text">Drivers</span>
-            </a>
+    <a
+      href="{% url 'shipment_list' %}"
+      class="{% if '/logistics/' in request.path %}active{% endif %}"
+    >
+      <span>🚚</span>
+      <span class="menu-text">Shipments</span>
+    </a>
 
-            <a href="{% url 'vehicle_list' %}">
-                <span>🚛</span>
-                <span class="menu-text">Vehicles</span>
-            </a>
+    <a href="{% url 'driver_list' %}">
+      <span>👤</span>
+      <span class="menu-text">Drivers</span>
+    </a>
 
+    <a href="{% url 'vehicle_list' %}">
+      <span>🚛</span>
+      <span class="menu-text">Vehicles</span>
+    </a>
 
-        {% elif request.user.profile.department == "inventory" %}
+    <a href="{% url 'alert_list' %}">
+      <span>🔔</span>
+      <span class="menu-text">Alerts</span>
+    </a>
 
-            <!-- INVENTORY -->
+    <!-- =====================================
+         INVENTORY
+    ====================================== -->
 
-            <a href="{% url 'inventory_list' %}">
-                <span>📊</span>
-                <span class="menu-text">Inventory</span>
-            </a>
+    {% elif request.user.profile.department == "inventory" %}
 
-            <a href="{% url 'stock_movement_list' %}">
-                <span>🔄</span>
-                <span class="menu-text">Stock Movements</span>
-            </a>
+    <a
+      href="{% url 'inventory_list' %}"
+      class="{% if '/inventory/' in request.path %}active{% endif %}"
+    >
+      <span>📊</span>
+      <span class="menu-text">Inventory</span>
+    </a>
 
+    <a href="{% url 'stock_movement_list' %}">
+      <span>🔄</span>
+      <span class="menu-text">Stock Movements</span>
+    </a>
 
-        {% elif request.user.profile.department == "warehouse" %}
+    <a href="{% url 'alert_list' %}">
+      <span>🔔</span>
+      <span class="menu-text">Alerts</span>
+    </a>
 
-            <!-- WAREHOUSE -->
+    <!-- =====================================
+         WAREHOUSE
+    ====================================== -->
 
-            <a href="{% url 'warehouse_list' %}">
-                <span>🏭</span>
-                <span class="menu-text">Warehouses</span>
-            </a>
+    {% elif request.user.profile.department == "warehouse" %}
 
-            <a href="{% url 'inventory_list' %}">
-                <span>📊</span>
-                <span class="menu-text">Inventory</span>
-            </a>
+    <a
+      href="{% url 'warehouse_list' %}"
+      class="{% if '/warehouse/' in request.path %}active{% endif %}"
+    >
+      <span>🏭</span>
+      <span class="menu-text">Warehouses</span>
+    </a>
 
+    <!-- =====================================
+         FINANCE
+    ====================================== -->
 
-        {% elif request.user.profile.department == "finance" %}<!-- FINANCE -->
+    {% elif request.user.profile.department == "finance" %}
 
-            <a href="{% url 'purchase_order_list' %}">
-                <span>💰</span>
-                <span class="menu-text">Purchase Orders</span>
-            </a>
+    <a href="{% url 'reports_dashboard' %}">
+      <span>📈</span>
+      <span class="menu-text">Reports & Analytics</span>
+    </a>
 
-            <a href="#">
-                <span>📈</span>
-                <span class="menu-text">Financial Reports</span>
-            </a>
+    <!-- =====================================
+         SUPPLY CHAIN DEPARTMENT
+    ====================================== -->
 
+    {% elif request.user.profile.department == "supply_chain" %}
 
-        {% endif %}
+    <a href="{% url 'reports_dashboard' %}">
+      <span>📈</span>
+      <span class="menu-text">Reports & Analytics</span>
+    </a>
 
-    </nav>
+    <a href="{% url 'alert_list' %}">
+      <span>🔔</span>
+      <span class="menu-text">Operational Alerts</span>
+    </a>
 
+    {% endif %}
+  </nav>
 </aside>

@@ -1,25 +1,39 @@
 {% extends "layout/dashboard_base.html" %}
-
 {% block content %}
+<div>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        Inventory
+    </h2>
 
-    <div>
-        <h2>Inventory</h2>
+    <p class="text-muted mb-0">
+        Monitor product quantities across warehouses.
+    </p>
 
-        <p class="text-muted mb-0">
-            Monitor product quantities across warehouses.
-        </p>
-    </div>
+</div>
 
-    <div class="d-flex gap-2">
 
-        <a
-            href="{% url 'stock_movement_list' %}"
-            class="btn btn-outline-primary"
-        >
-            Stock Movements
-        </a>
+<div class="d-flex gap-2">
+
+    <!--
+        VIEWERS CAN SEE MOVEMENT HISTORY
+        because stock_movement_list is read-only.
+    -->
+
+    <a
+        href="{% url 'stock_movement_list' %}"
+        class="btn btn-outline-primary"
+    >
+        Stock Movements
+    </a>
+
+
+    <!--
+        OFFICER / MANAGER / ADMIN
+        can add inventory.
+    -->
+
+    {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
 
         <a
             href="{% url 'inventory_create' %}"
@@ -28,439 +42,495 @@
             Add Inventory
         </a>
 
-    </div>
+    {% endif %}
 
 </div>
+<!-- CURRENT STOCK VALUE -->
 
+<div class="col-md-6 col-xl-3">
 
-<!-- INVENTORY VALUE CARD -->
+    <div class="dashboard-kpi-card">
 
-<div class="row g-3 mb-4">
-
-    <div class="col-md-6 col-xl-3">
-
-        <div class="dashboard-kpi-card">
-
-            <div class="kpi-icon">
-                💰
-            </div>
-
-            <div>
-
-                <p class="kpi-label">
-                    Current Stock Value
-                </p>
-
-                <h3 class="kpi-value">
-                    FCFA {{ total_inventory_value|floatformat:0 }}
-                </h3>
-
-                <p class="kpi-note">
-                    Value of stock currently available
-                </p>
-
-            </div>
-
+        <div class="kpi-icon">
+            💰
         </div>
 
-    </div>
+        <div>
 
+            <p class="kpi-label">
+                Current Stock Value
+            </p>
 
-    <div class="col-md-6 col-xl-3">
+            <h3 class="kpi-value">
+                FCFA {{ total_inventory_value|floatformat:0 }}
+            </h3>
 
-        <div class="dashboard-kpi-card">
-
-            <div class="kpi-icon">
-                📥
-            </div>
-
-            <div>
-
-                <p class="kpi-label">
-                    Stock Received Value
-                </p>
-
-                <h3 class="kpi-value">
-                    FCFA {{ stock_in_value|floatformat:0 }}
-                </h3>
-
-                <p class="kpi-note">
-                    Value of recorded stock-in movements
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="col-md-6 col-xl-3">
-
-        <div class="dashboard-kpi-card dashboard-kpi-warning">
-
-            <div class="kpi-icon">
-                📤
-            </div>
-
-            <div>
-
-                <p class="kpi-label">
-                    Stock Issued Value
-                </p>
-
-                <h3 class="kpi-value">
-                    FCFA {{ stock_out_value|floatformat:0 }}
-                </h3>
-
-                <p class="kpi-note">
-                    Value dispatched out of inventory
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="col-md-6 col-xl-3">
-
-        <div class="dashboard-kpi-card">
-
-            <div class="kpi-icon">
-                📦
-            </div>
-
-            <div>
-
-                <p class="kpi-label">
-                    Current Units
-                </p>
-
-                <h3 class="kpi-value">
-                    {{ current_units }}
-                </h3>
-
-                <p class="kpi-note">
-                    Total units currently in stock
-                </p>
-
-            </div>
+            <p class="kpi-note">
+                Value of stock currently available
+            </p>
 
         </div>
 
     </div>
 
 </div>
-<div class="row g-4 mb-4">
 
-    <!-- WAREHOUSE VALUATION -->
 
-    <div class="col-lg-5">
+<!-- STOCK RECEIVED -->
 
-        <div class="dashboard-panel h-100">
+<div class="col-md-6 col-xl-3">
 
-            <div class="dashboard-panel-header">
+    <div class="dashboard-kpi-card">
 
-                <div>
+        <div class="kpi-icon">
+            📥
+        </div>
 
-                    <p class="dashboard-eyebrow">
-                        WAREHOUSE VALUE
-                    </p>
+        <div>
 
-                    <h4>
-                        Inventory by Warehouse
-                    </h4>
+            <p class="kpi-label">
+                Stock Received Value
+            </p>
 
-                </div>
+            <h3 class="kpi-value">
+                FCFA {{ stock_in_value|floatformat:0 }}
+            </h3>
+
+            <p class="kpi-note">
+                Value of recorded stock-in movements
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- STOCK ISSUED -->
+
+<div class="col-md-6 col-xl-3">
+
+    <div class="dashboard-kpi-card dashboard-kpi-warning">
+
+        <div class="kpi-icon">
+            📤
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Stock Issued Value
+            </p>
+
+            <h3 class="kpi-value">
+                FCFA {{ stock_out_value|floatformat:0 }}
+            </h3>
+
+            <p class="kpi-note">
+                Value dispatched out of inventory
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- CURRENT UNITS -->
+
+<div class="col-md-6 col-xl-3">
+
+    <div class="dashboard-kpi-card">
+
+        <div class="kpi-icon">
+            📦
+        </div>
+
+        <div>
+
+            <p class="kpi-label">
+                Current Units
+            </p>
+
+            <h3 class="kpi-value">
+                {{ current_units }}
+            </h3>
+
+            <p class="kpi-note">
+                Total units currently in stock
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- WAREHOUSE VALUATION -->
+
+<div class="col-lg-5">
+
+    <div class="dashboard-panel h-100">
+
+        <div class="dashboard-panel-header">
+
+            <div>
+
+                <p class="dashboard-eyebrow">
+                    WAREHOUSE VALUE
+                </p>
+
+                <h4>
+                    Inventory by Warehouse
+                </h4>
 
             </div>
 
+        </div>
 
-            {% if warehouse_values %}
 
-                <div class="dashboard-list">
+        {% if warehouse_values %}
 
-                    {% for warehouse in warehouse_values %}
+            <div class="dashboard-list">
 
-                        <div class="dashboard-list-item">
+                {% for warehouse in warehouse_values %}
 
-                            <div>
+                    <div class="dashboard-list-item">
 
-                                <strong>
-                                    {{ warehouse.warehouse__name }}
-                                </strong>
-
-                                <span class="d-block text-muted">
-                                    Current stock valuation
-                                </span>
-
-                            </div>
-
+                        <div>
 
                             <strong>
-                                FCFA
-                                {{ warehouse.total_value|floatformat:0 }}
+                                {{ warehouse.warehouse__name }}
                             </strong>
+
+                            <span class="d-block text-muted">
+                                Current stock valuation
+                            </span>
 
                         </div>
 
-                    {% endfor %}
 
-                </div>
+                        <strong>
+                            FCFA
+                            {{ warehouse.total_value|floatformat:0 }}</strong>
 
-            {% else %}
+                    </div>
 
-                <p class="text-muted mb-0">
-                    No warehouse valuation data available.
-                </p>
-
-            {% endif %}
-
-        </div>
-
-    </div>
-
-
-    <!-- MOVEMENT CHART -->
-
-    <div class="col-lg-7">
-
-        <div class="dashboard-panel h-100">
-
-            <div class="dashboard-panel-header">
-
-                <div>
-
-                    <p class="dashboard-eyebrow">
-                        STOCK ACTIVITY
-                    </p>
-
-                    <h4>
-                        Inventory Movement Trend
-                    </h4>
-
-                </div>
+                {% endfor %}
 
             </div>
 
+        {% else %}
 
-            <div
-                style="
-                    position: relative;
-                    height: 320px;
-                "
-            >
+            <p class="text-muted mb-0">
+                No warehouse valuation data available.
+            </p>
 
-                <canvas id="inventoryMovementChart"></canvas>
-
-            </div>
-
-        </div>
+        {% endif %}
 
     </div>
 
 </div>
 
 
-<!-- MESSAGES -->
+<!-- STOCK MOVEMENT CHART -->
 
-{% if messages %}
+<div class="col-lg-7">
 
-    {% for message in messages %}
+    <div class="dashboard-panel h-100">
 
-        <div class="alert alert-success">
-            {{ message }}
+        <div class="dashboard-panel-header">
+
+            <div>
+
+                <p class="dashboard-eyebrow">
+                    STOCK ACTIVITY
+                </p>
+
+                <h4>
+                    Inventory Movement Trend
+                </h4>
+
+            </div>
+
         </div>
 
-    {% endfor %}
 
-{% endif %}
+        <div
+            style="
+                position: relative;
+                height: 320px;
+            "
+        >
 
-
-<!-- FILTERS -->
-
-<form
-    method="get"
-    class="card border-0 shadow-sm mb-4"
->
-
-    <div class="card-body">
-
-        <div class="row g-3">
-
-            <div class="col-md-6">
-
-                <input
-                    type="text"
-                    name="q"
-                    value="{{ query }}"
-                    class="form-control"
-                    placeholder="Search product, SKU or warehouse"
-                >
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <select
-                    name="warehouse"
-                    class="form-select"
-                >
-
-                    <option value="">
-                        All warehouses
-                    </option>
-
-                    {% for warehouse in warehouses %}
-
-                        <option
-                            value="{{ warehouse.id }}"
-                            {% if selected_warehouse == warehouse.id|stringformat:"s" %}
-                                selected
-                            {% endif %}
-                        >
-                            {{ warehouse.name }}
-                        </option>
-
-                    {% endfor %}
-
-                </select>
-
-            </div>
-
-
-            <div class="col-md-2">
-
-                <select
-                    name="status"
-                    class="form-select"
-                >
-
-                    <option value="">
-                        All stock
-                    </option>
-
-                    <option
-                        value="low"
-                        {% if selected_status == "low" %}
-                            selected
-                        {% endif %}
-                    >
-                        Low stock
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="col-md-1">
-
-                <button
-                    type="submit"
-                    class="btn btn-outline-primary w-100"
-                >
-                    Go
-                </button>
-
-            </div>
+            <canvas id="inventoryMovementChart"></canvas>
 
         </div>
 
     </div>
 
-</form>
+</div>
+{% if messages %}
+{% for message in messages %}
+
+    <div
+        class="alert alert-{{ message.tags|default:'info' }}"
+    >
+        {{ message }}
+    </div>
+
+{% endfor %}
+{% endif %}
+<div class="card-body">
+
+    <div class="row g-3">
 
 
-<!-- INVENTORY TABLE -->
+        <!-- SEARCH -->
 
-<div class="card border-0 shadow-sm">
+        <div class="col-md-6">
 
-    <div class="card-body">
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                class="form-control"
+                placeholder="Search product, SKU or warehouse"
+            >
 
-        <div class="table-responsive">
+        </div>
 
-            <table class="table align-middle">
 
-                <thead>
+        <!-- WAREHOUSE -->
+
+        <div class="col-md-3">
+
+            <select
+                name="warehouse"
+                class="form-select"
+            >
+
+                <option value="">
+                    All warehouses
+                </option>
+
+                {% for warehouse in warehouses %}
+
+                    <option
+                        value="{{ warehouse.id }}"
+                        {% if selected_warehouse == warehouse.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ warehouse.name }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- STOCK STATUS -->
+
+        <div class="col-md-2">
+
+            <select
+                name="status"
+                class="form-select"
+            >
+
+                <option value="">
+                    All stock
+                </option>
+
+                <option
+                    value="low"
+                    {% if selected_status == "low" %}
+                        selected
+                    {% endif %}
+                >
+                    Low stock
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- FILTER BUTTON -->
+
+        <div class="col-md-1">
+
+            <button
+                type="submit"
+                class="btn btn-outline-primary w-100"
+            >
+                Go
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="card-body">
+
+    <div class="table-responsive">
+
+        <table class="table align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Product
+                    </th>
+
+                    <th>
+                        SKU
+                    </th>
+
+                    <th>
+                        Warehouse
+                    </th>
+
+                    <th>
+                        Quantity
+                    </th>
+
+                    <th>
+                        Unit Price
+                    </th>
+
+                    <th>
+                        Stock Value
+                    </th>
+
+                    <th>
+                        Reorder Level
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+
+                    <!--
+                        ACTION COLUMN ONLY APPEARS
+                        FOR MANAGER / ADMIN
+                    -->
+
+                    {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" %}
+
+                        <th>
+                            Actions
+                        </th>
+
+                    {% endif %}
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for record in inventory_records %}
 
                     <tr>
-                        <th>Product</th>
-                        <th>SKU</th>
-                        <th>Warehouse</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        <th>Stock Value</th>
-                        <th>Reorder Level</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-
-                </thead>
 
 
-                <tbody>
+                        <!-- PRODUCT -->
 
-                    {% for record in inventory_records %}
+                        <td>
+                            {{ record.product.name }}
+                        </td>
 
-                        <tr>
 
-                            <td>
-                                {{ record.product.name }}
-                            </td>
+                        <!-- SKU -->
 
-                            <td>
-                                {{ record.product.sku }}
-                            </td>
+                        <td>
+                            {{ record.product.sku }}
+                        </td>
 
-                            <td>
-                                {{ record.warehouse.name }}
-                            </td>
 
-                            <td>
-                                {{ record.quantity }}
-                            </td>
+                        <!-- WAREHOUSE -->
 
-                            <td>
-                                FCFA {{ record.product.unit_price|floatformat:0 }}
-                            </td>
+                        <td>
+                            {{ record.warehouse.name }}
+                        </td>
 
-                            <td>
 
-                                <strong>
-                                    FCFA {{ record.stock_value|floatformat:0 }}
-                                </strong>
+                        <!-- QUANTITY -->
 
-                            </td>
+                        <td>
+                            {{ record.quantity }}
+                        </td>
 
-                            <td>
-                                {{ record.product.reorder_level }}
-                            </td>
 
-                            <td>
+                        <!-- UNIT PRICE -->
 
-                                {% if record.is_low_stock %}
+                        <td>
+                            FCFA
+                            {{ record.product.unit_price|floatformat:0 }}
+                        </td>
 
-                                    <span class="badge bg-danger">
-                                        Low Stock
-                                    </span>
 
-                                {% else %}
+                        <!-- STOCK VALUE -->
 
-                                    <span class="badge bg-success">
-                                        In Stock
-                                    </span>
+                        <td>
 
-                                {% endif %}
+                            <strong>
+                                FCFA
+                                {{ record.stock_value|floatformat:0 }}
+                            </strong>
 
-                            </td>
+                        </td>
+
+
+                        <!-- REORDER LEVEL -->
+
+                        <td>
+                            {{ record.product.reorder_level }}
+                        </td>
+
+
+                        <!-- STOCK STATUS -->
+
+                        <td>
+
+                            {% if record.is_low_stock %}
+
+                                <span class="badge bg-danger">
+                                    Low Stock
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-success">
+                                    In Stock
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =====================================
+                             MANAGER ACTIONS
+                        ====================================== -->
+
+                        {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" %}
 
                             <td class="actions-cell">
 
                                 <div class="action-buttons">
+
+                                    <!-- STOCK MOVEMENT -->
 
                                     <a
                                         href="{% url 'stock_movement_create' record.id %}"
@@ -468,6 +538,9 @@
                                     >
                                         Movement
                                     </a>
+
+
+                                    <!-- EDIT INVENTORY -->
 
                                     <a
                                         href="{% url 'inventory_update' record.id %}"
@@ -480,136 +553,46 @@
 
                             </td>
 
-                        </tr>
+                        {% endif %}
 
-                    {% empty %}
+                    </tr>
 
-                        <tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" %}
 
                             <td
                                 colspan="9"
                                 class="text-center text-muted py-4"
                             >
+                                No inventory records found.</td>
+
+                        {% else %}
+
+                            <td
+                                colspan="8"
+                                class="text-center text-muted py-4"
+                            >
                                 No inventory records found.
                             </td>
 
-                        </tr>
+                        {% endif %}
 
-                    {% endfor %}
+                    </tr>
 
-                </tbody>
+                {% endfor %}
 
-            </table>
+            </tbody>
 
-        </div>
+        </table>
 
     </div>
 
 </div>
 {{ movement_chart_labels|json_script:"movement-chart-labels" }}
-
 {{ movement_chart_stock_in|json_script:"movement-chart-stock-in" }}
-
 {{ movement_chart_stock_out|json_script:"movement-chart-stock-out" }}
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const labels = JSON.parse(
-            document.getElementById(
-                "movement-chart-labels"
-            ).textContent
-        );
-
-        const stockIn = JSON.parse(
-            document.getElementById(
-                "movement-chart-stock-in"
-            ).textContent
-        );
-
-        const stockOut = JSON.parse(
-            document.getElementById(
-                "movement-chart-stock-out"
-            ).textContent
-        );
-
-
-        const chartElement =
-            document.getElementById(
-                "inventoryMovementChart"
-            );
-
-
-        if (chartElement) {
-
-            new Chart(
-                chartElement,
-                {
-                    type: "bar",
-
-                    data: {
-                        labels: labels,
-
-                        datasets: [
-                            {
-                                label: "Stock Received",
-                                data: stockIn
-                            },
-
-                            {
-                                label: "Stock Issued",
-                                data: stockOut
-                            }
-                        ]
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false,
-
-                        interaction: {
-                            mode: "index",
-                            intersect: false
-                        },
-
-                        scales: {
-
-                            y: {
-                                beginAtZero: true,
-
-                                ticks: {
-                                    precision: 0
-                                }
-                            }
-
-                        },
-
-                        plugins: {
-
-                            legend: {
-                                position: "bottom"
-                            }
-
-                        }
-
-                    }
-                }
-            );
-
-        }
-
-    }
-);
-
-</script>
-
 {% endblock %}

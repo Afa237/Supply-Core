@@ -101,3 +101,65 @@ def role_required(minimum_role):
         return wrapper
 
     return decorator
+def full_access_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+
+        user = request.user
+
+        if not user.is_authenticated:
+            return redirect("login")
+
+
+        # Django superuser always allowed
+        if user.is_superuser:
+            return view_func(
+                request,
+                *args,
+                **kwargs,
+            )
+
+
+        profile = getattr(
+            user,
+            "profile",
+            None,
+        )
+
+
+        if not profile:
+
+            messages.error(
+                request,
+                (
+                    "Your account does not have "
+                    "an assigned profile."
+                ),
+            )
+
+            return redirect("home")
+
+
+        if profile.role not in [
+            "admin",
+            "supply_chain_manager",
+        ]:
+
+            messages.error(
+                request,
+                (
+                    "You do not have permission "
+                    "to access this area."
+                ),
+            )
+
+            return redirect("home")
+
+
+        return view_func(
+            request,
+            *args,
+            **kwargs,
+        )
+
+    return wrapper

@@ -6,7 +6,7 @@ from accounts.decorators import (
     department_required,
     role_required,
 )
-
+from django.db.models.deletion import ProtectedError
 from .forms import PurchaseOrderForm, PurchaseOrderItemForm
 from .models import PurchaseOrder, PurchaseOrderItem, Supplier
 from audit.utils import log_action
@@ -288,7 +288,18 @@ def purchase_order_delete(request, po_id):
             ),
         )
 
-        purchase_order.delete()
+        try:
+            purchase_order.delete()
+        except ProtectedError:
+            messages.error(
+                request,
+                (
+                    "This Purchase Order cannot be deleted "
+                    "because it already has a shipment "
+                    "associated with it."
+                ),
+            )
+            return redirect("purchase_order_list")
 
         messages.success(
             request,
