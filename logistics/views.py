@@ -120,25 +120,28 @@ def shipment_list(request):
     # DRIVER
     if driver_id:
 
-        shipments = shipments.filter(
-            driver_id=driver_id
-        )
+        shipments = filter_by_user_scope(
+            Driver.objects.filter(active=True),
+            request.user
+        ).order_by("name")
 
 
     # VEHICLE
     if vehicle_id:
 
-        shipments = shipments.filter(
-            vehicle_id=vehicle_id
-        )
+        shipments = filter_by_user_scope(
+            Vehicle.objects.filter(active=True),
+            request.user
+        ).order_by("registration_number")
 
 
     # DESTINATION WAREHOUSE
     if warehouse_id:
 
-        shipments = shipments.filter(
-            destination_warehouse_id=warehouse_id
-        )
+        shipments = filter_by_user_scope(
+            Warehouse.objects.all(),
+            request.user,
+        ).order_by("name")
 
 
     # EXPECTED DELIVERY DATE FROM
@@ -175,13 +178,14 @@ def shipment_list(request):
 
     # CREATE DELAY ALERTS
     delayed_shipments = Shipment.objects.filter(
-        estimated_delivery_date__lt=today
-    ).exclude(
-        status__in=[
-            "delivered",
-            "cancelled",
+            estimated_delivery_date__lt=today
+        ).exclude(
+            status__in=[
+                "delivered",
+                "cancelled",
         ]
     )
+
 
     for shipment in delayed_shipments:
 
@@ -287,6 +291,10 @@ def shipment_create(request):
     initial_data = {}
 
     if po_id:
+        purchase_orders = filter_by_user_scope(
+            PurchaseOrder.objects.all(),
+            request.user,
+        )
 
         purchase_order = get_object_or_404(
             PurchaseOrder,
@@ -301,7 +309,8 @@ def shipment_create(request):
     if request.method == "POST":
 
         form = ShipmentForm(
-            request.POST
+            request.POST,
+            user=request.user,
         )
 
         if form.is_valid():
@@ -318,13 +327,10 @@ def shipment_create(request):
                     ),
                 )
             else:
-                shipment = form.save(
-                    commit=False
-                )
-
-                shipment.created_by = (
-                    request.user
-                )
+                shipment = form.save(commit=False)
+                shipment.created_by = (request.user)
+                shipment.branch = shipment.purchase_order.branch
+                shipment.save()
                 profile = request.user.profile
 
                 if profile.branch:
@@ -373,7 +379,8 @@ def shipment_create(request):
     else:
 
         form = ShipmentForm(
-            initial=initial_data
+            initial=initial_data,
+            user=request.user,
         )
 
 
@@ -405,10 +412,13 @@ def shipment_update(request, shipment_id):
         form = ShipmentForm(
             request.POST,
             instance=shipment,
+            user=request.user,
         )
 
         if form.is_valid():
-            shipment = form.save()
+            shipment = form.save(commit=False)
+            shipment.branch = shipment.purchase_order.branch
+            shipment.save()
             if shipment.status in ["delivered", "cancelled"]:
                 resolve_shipment_alert(shipment)
             log_action(
@@ -425,7 +435,7 @@ def shipment_update(request, shipment_id):
 
             return redirect("shipment_list")
     else:
-        form = ShipmentForm(instance=shipment)
+        form = ShipmentForm(instance=shipment, user=request.user)
 
     return render(
         request,
@@ -505,7 +515,10 @@ def shipment_delete(request, shipment_id):
 @department_required("logistics")
 @role_required("viewer")
 def driver_list(request):
-    drivers = Driver.objects.all()
+    drivers = filter_by_user_scope(
+        Driver.objects.all(),
+        request.user,
+    )
 
     return render(
         request,
@@ -522,7 +535,9 @@ def driver_create(request):
         form = DriverForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            driver = form.save(commit=False)
+            driver.branch = request.user.profile.branch
+            driver.save()
             return redirect("driver_list")
     else:
         form = DriverForm()
@@ -541,7 +556,10 @@ def driver_create(request):
 @department_required("logistics")
 @role_required("viewer")
 def vehicle_list(request):
-    vehicles = Vehicle.objects.all()
+    vehicles = filter_by_user_scope(
+        Vehicle.objects.all(),
+        request.user,
+    )
 
     return render(
         request,
@@ -558,7 +576,9 @@ def vehicle_create(request):
         form = VehicleForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            vehicle = form.save(commit=False)
+            vehicle.branch = request.user.profile.branch
+            vehicle.save()
             return redirect("vehicle_list")
     else:
         form = VehicleForm()
@@ -574,14 +594,18 @@ def vehicle_create(request):
     )
 @login_required
 @department_required("logistics")
+@role_required("officer")
 def receive_shipment(request, shipment_id):
-    shipment = get_object_or_404(
-        Shipment.objects.select_related(
-            "purchase_order",
-            "destination_warehouse",
-        ),
-        id=shipment_id,
+    shipment = Shipment.objects.select_related(
+        "purchase_order",
+        "destination_warehouse",
+        "branch",
     )
+    shipments = filter_by_user_scope(
+        shipments,
+        request.user,
+    )
+    shipment = get_object_or_404(shipments, id=shipment_id)
 
     if request.method == "POST":
 

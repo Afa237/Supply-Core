@@ -58,26 +58,38 @@ def warehouse_list(request):
 @role_required("officer")
 def warehouse_create(request):
     if request.method == "POST":
-        form = WarehouseForm(request.POST)
+        form = WarehouseForm(
+            request.POST,
+            user=request.user
+        )
 
         if form.is_valid():
             warehouse = form.save(commit=False)
-
             profile = request.user.profile
 
-            if profile.branch:
+            if profile.role not in [
+                "admin",
+                "supply_chain_manager",
+            ] and not request.user.is_superuser:
                 warehouse.branch = profile.branch
-            else:
+
+            if not warehouse.branch:
                 messages.error(
                     request,
-                    "Your account must be assigned to a branch before creating a warehouse.",
+                    "Please select a branch.",
                 )
-                return redirect("warehouse_list")
-
-            warehouse.save()
+            else:
+                warehouse.save()
+                messages.success(
+                    request,
+                    "Warehouse created successfully.",
+                )
             return redirect("warehouse_list")
+
     else:
-        form = WarehouseForm()
+        form = WarehouseForm(
+            user=request.user
+        )
 
     return render(
         request,
@@ -106,13 +118,14 @@ def warehouse_update(request, warehouse_id):
         form = WarehouseForm(
             request.POST,
             instance=warehouse,
+            user=request.user,
         )
 
         if form.is_valid():
             form.save()
             return redirect("warehouse_list")
     else:
-        form = WarehouseForm(instance=warehouse)
+        form = WarehouseForm(instance=warehouse, user=request.user)
 
     return render(
         request,
@@ -171,6 +184,8 @@ def warehouse_export_csv(request):
         "Country",
         "Capacity",
         "Status",
+        "Company",
+        "Branch",
     ])
 
     for warehouse in warehouses:
@@ -182,6 +197,8 @@ def warehouse_export_csv(request):
             warehouse.country,
             warehouse.capacity,
             warehouse.get_status_display(),
+            warehouse.branch.company.name if warehouse.branch else "",
+            warehouse.branch.name if warehouse.branch else "",
         ])
 
     return response

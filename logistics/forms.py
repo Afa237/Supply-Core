@@ -1,7 +1,8 @@
 from django import forms
-
 from .models import Driver, Shipment, Vehicle
-
+from accounts.access import filter_by_user_scope
+from procurement.models import PurchaseOrder
+from warehouse.models import Warehouse
 
 class DriverForm(forms.ModelForm):
     class Meta:
@@ -26,6 +27,29 @@ class VehicleForm(forms.ModelForm):
 
 
 class ShipmentForm(forms.ModelForm):
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if user:
+            self.fields["purchase_order"].queryset = filter_by_user_scope(
+                PurchaseOrder.objects.all(),
+                user,
+            )
+
+            self.fields["destination_warehouse"].queryset = filter_by_user_scope(
+                Warehouse.objects.all(),
+                user,
+            )
+
+            self.fields["driver"].queryset = filter_by_user_scope(
+                Driver.objects.filter(active=True),
+                user,
+            )
+
+            self.fields["vehicle"].queryset = filter_by_user_scope(
+                Vehicle.objects.filter(active=True),
+                user,
+            )
     class Meta:
         model = Shipment
         fields = [
