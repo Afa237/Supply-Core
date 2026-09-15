@@ -442,8 +442,8 @@ def shipment_update(request, shipment_id):
 @role_required("viewer")
 def shipment_detail(request, shipment_id):
     shipments = filter_by_user_scope(
-    Shipment.objects.all(),
-    request.user,
+        Shipment.objects.all(),
+        request.user,
     )
     shipment = get_object_or_404(
         Shipment.objects.select_related(
@@ -454,12 +454,7 @@ def shipment_detail(request, shipment_id):
             "created_by",
             "branch",
         ),
-        shipments = filter_by_user_scope(
-            shipments,
-            request.user,
-        ),
-        shipment = get_object_or_404(
-            Shipment,
+        shipments,
         id=shipment_id,
     )
 
