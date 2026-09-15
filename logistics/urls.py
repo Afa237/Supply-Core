@@ -43,4 +43,9 @@ urlpatterns = [
         views.receive_shipment,
         name="receive_shipment",
     ),
+    path(
+        "shipments/download/",
+        views.shipment_export_csv,
+        name="shipment_export_csv",
+    ),
 ]

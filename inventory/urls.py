@@ -19,4 +19,9 @@ urlpatterns = [
         views.stock_movement_list,
         name="stock_movement_list",
     ),
+    path(
+        "download/",
+        views.inventory_export_csv,
+        name="inventory_export_csv",
+    ),
 ]

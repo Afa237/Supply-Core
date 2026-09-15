@@ -1,6 +1,7 @@
 from django.db import models
 from suppliers.models import Supplier
 from products.models import Product
+from accounts.models import Branch
 
 class PurchaseOrder(models.Model):
 
@@ -42,6 +43,14 @@ class PurchaseOrder(models.Model):
     remarks = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.PROTECT,
+        related_name="procurement_purchase_orders",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.po_number
@@ -78,5 +87,5 @@ class PurchaseOrderItem(models.Model):
 
     def __str__(self):
         return f"{self.purchase_order.po_number} - {self.product.name}"
-
+    
 # Create your models here.

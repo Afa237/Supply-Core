@@ -9,12 +9,17 @@
             Manage supplier purchase orders and approvals.
         </p>
     </div>
+    {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "manager" or request.user.profile.role == "oficer" %}
 
     <a
         href="{% url 'purchase_order_create' %}"
         class="btn btn-primary"
     >
         Create Purchase Order
+    </a>
+    {% endif %}
+    <a href="{% url 'purchase_order_export_csv' %}" class="btn btn-outline-success">
+        Download CSV
     </a>
 </div>
 
@@ -229,7 +234,7 @@
                 </thead>
 
                 <tbody>
-                    {% for po in purchase_orders %}
+                    {% for po in purchase_order %}
                         <tr>
                             <td>{{ po.po_number }}</td>
                             <td>{{ po.supplier.name }}</td>
@@ -245,26 +250,30 @@
                             <td>{{ po.total_amount }}</td>
                             <td>
                                 <div class="action-buttons">
-
+                                    <!--EVERYOne-->
                                     <a
                                         href="{% url 'purchase_order_detail' po.id %}"
                                         class="btn btn-sm btn-outline-dark"
                                     >
                                         View
                                     </a>
-
+                                 <!--OFFICER + MONAGER + ADMIN-->
+                                 {% if request.user.is_superuser or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
                                     <a
                                         href="{% url 'purchase_order_update' po.id %}"
                                         class="btn btn-sm btn-outline-primary"
                                     >
-                                        Edit
+                                        Update
                                     </a>
-
+                                 {% endif %}
+                                 <!-- ADMIN ONLY -->
+                                 {% if request.user.is_superuser or request.user.profile.role == "admin"%}
                                     <a
                                         href="{% url 'purchase_order_delete' po.id %}" class="btn btn-sm btn-outline-danger"
                                     >
                                         Delete
                                     </a>
+                                 {% endif %}
 
                                 </div>
                             </td>

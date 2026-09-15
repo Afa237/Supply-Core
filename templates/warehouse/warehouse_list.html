@@ -9,9 +9,13 @@
             Manage storage facilities and warehouse capacity.
         </p>
     </div>
-
+    {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
     <a href="{% url 'warehouse_create' %}" class="btn btn-primary">
         Add Warehouse
+    </a>
+    {% endif %}
+    <a href="{% url 'warehouse_export_csv' %}" class="btn btn-outline-success">
+        Download CSV
     </a>
 </div>
 
@@ -93,19 +97,24 @@
                             <td>{{ warehouse.get_status_display }}</td>
                             <td class="actions-cell">
                                 <div class="action-buttons">
+                                <!-- OFFICER + MANAGER + ADMIN-->
+                                {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "manager" or request.user.profile.role == "official" %}
                                 <a
                                     href="{% url 'warehouse_update' warehouse.id %}"
                                     class="btn btn-sm btn-outline-primary"
                                 >
                                     Edit
                                 </a>
-
+                                {% endif %}
+                                <!-- ADMIN ONLY -->
+                                {% if request.user.is_superuser or request.user.profile.role == "admin" %}
                                 <a
                                     href="{% url 'warehouse_delete' warehouse.id %}"
                                     class="btn btn-sm btn-outline-danger"
                                 >
                                     Delete
                                 </a>
+                                {% endif %}
                                 </div>
                             </td>
                         </tr>

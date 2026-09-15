@@ -21,6 +21,9 @@ from notifications.services import (
 )
 from django.db import models
 from django.db.models.functions import TruncMonth
+import csv
+from django.http import HttpResponse
+from accounts.access import filter_by_user_scope
 
 
 
@@ -32,6 +35,12 @@ def inventory_list(request):
         "product",
         "warehouse",
     )
+    inventory_records = filter_by_user_scope(
+        inventory_records,
+        request.user,
+        branch_field="warehouse__branch",
+    )
+    
     inventory_value_data = (
         Inventory.objects
         .select_related("product")
@@ -251,8 +260,13 @@ def inventory_create(request):
 
 @login_required
 @department_required("inventory")
-@role_required("manager")
+@role_required("officer")
 def inventory_update(request, inventory_id):
+    inventory_records = filter_by_user_scope(
+    Inventory.objects.all(),
+    request.user,
+    branch_field="warehouse__branch",
+    )
     inventory = get_object_or_404(
         Inventory,
         id=inventory_id,
@@ -288,6 +302,11 @@ def inventory_update(request, inventory_id):
 @department_required("inventory")
 @role_required("manager")
 def stock_movement_create(request, inventory_id):
+    inventory_records = filter_by_user_scope(
+    Inventory.objects.all(),
+    request.user,
+    branch_field="warehouse__branch",
+    )
     inventory = get_object_or_404(
         Inventory,
         id=inventory_id,
@@ -364,5 +383,48 @@ def stock_movement_list(request):
         "inventory/stock_movement_list.html",
         {"movements": movements},
     )
+@login_required
+@department_required("inventory")
+@role_required("viewer")
+def inventory_export_csv(request):
+    inventory_records = Inventory.objects.select_related(
+        "product",
+        "warehouse",
+        "warehouse__branch",
+    )
+    inventory_records = filter_by_user_scope(
+        inventory_records,
+        request.user,
+        branch_field="warehouse__branch",
+    )
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="inventory.csv"'
+
+    writer = csv.writer(response)
+
+    writer.writerow([
+        "Product",
+        "SKU",
+        "Warehouse",
+        "Quantity",
+        "Unit Price",
+        "Stock Value",
+        "Reorder Level",
+        "Status",
+    ])
+
+    for record in inventory_records:
+        writer.writerow([
+            record.product.name,
+            record.product.sku,
+            record.warehouse.name,
+            record.quantity,
+            record.product.unit_price,
+            record.stock_value,
+            record.product.reorder_level,
+            "Low Stock" if record.is_low_stock else "In Stock",
+        ])
+
+    return response
 
 # Create your views here.

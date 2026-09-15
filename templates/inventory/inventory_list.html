@@ -26,6 +26,9 @@
     >
         Stock Movements
     </a>
+    <a href="{% url 'inventory_export_csv' %}" class="btn btn-outline-success">
+        Download CSV
+    </a>
 
 
     <!--
@@ -33,8 +36,7 @@
         can add inventory.
     -->
 
-    {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
-
+    {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
         <a
             href="{% url 'inventory_create' %}"
             class="btn btn-primary"

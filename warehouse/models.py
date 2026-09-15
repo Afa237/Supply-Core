@@ -1,4 +1,5 @@
 from django.db import models
+from accounts.models import Branch
 
 
 class Warehouse(models.Model):
@@ -51,4 +52,12 @@ class Warehouse(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.code})"
+    
+    branch = models.ForeignKey(
+    Branch,
+    on_delete=models.PROTECT,
+    related_name="warehouses",
+    null=True,
+    blank=True,
+)
 # Create your models here.

@@ -3,6 +3,7 @@ from django.db import models
 
 from procurement.models import PurchaseOrder
 from warehouse.models import Warehouse
+from accounts.models import Branch
 
 
 class Driver(models.Model):
@@ -13,6 +14,14 @@ class Driver(models.Model):
 
     def __str__(self):
         return self.name
+    
+    branch = models.ForeignKey(
+    Branch,
+    on_delete=models.PROTECT,
+    related_name="drivers",
+    null=True,
+    blank=True,
+)
 
 
 class Vehicle(models.Model):
@@ -44,6 +53,14 @@ class Vehicle(models.Model):
 
     def __str__(self):
         return self.registration_number
+    
+    branch = models.ForeignKey(
+    Branch,
+    on_delete=models.PROTECT,
+    related_name="vehicles",
+    null=True,
+    blank=True,
+)
 
 
 class Shipment(models.Model):
@@ -126,5 +143,13 @@ class Shipment(models.Model):
 
     def __str__(self):
         return self.tracking_number
+    
+    branch = models.ForeignKey(
+    Branch,
+    on_delete=models.PROTECT,
+    related_name="shipments",
+    null=True,
+    blank=True,
+)
 
 # Create your models here.

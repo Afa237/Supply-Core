@@ -15,6 +15,11 @@ from notifications.services import (
     create_alert,
     resolve_purchase_order_alert,
 )
+import csv
+from django.http import HttpResponse
+from accounts.access import filter_by_user_scope
+
+
 
 @login_required
 @department_required("procurement")
@@ -22,8 +27,14 @@ from notifications.services import (
 def purchase_order_list(request):
 
     purchase_orders = PurchaseOrder.objects.select_related(
-        "supplier"
+        "supplier",
+        "branch",
+        "branch__company",
     ).all()
+    purchase_orders = filter_by_user_scope(
+        purchase_orders,
+        request.user,
+    )
 
     query = request.GET.get("q", "").strip()
     supplier_id = request.GET.get("supplier", "")
@@ -110,21 +121,20 @@ def purchase_order_create(request):
         form = PurchaseOrderForm(request.POST)
 
         if form.is_valid():
-            purchase_order = form.save()
-            if purchase_order.status in ["received", "cancelled"]:
-                resolve_purchase_order_alert(purchase_order)
-            log_action(
-                request,
-                action="create",
-                obj=purchase_order,
-                description="Created purchase order.",
-                )
-            messages.success(
-                request,
-                "Purchase order created successfully.",
-            )
+            purchase_order = form.save(commit=False)
 
-            return redirect("purchase_order_list")
+            profile = request.user.profile
+
+            if profile.branch:
+                purchase_order.branch = profile.branch
+            else:
+                messages.error(
+                    request,
+                    "Your account must be assigned to a branch before creating a Purchase Order.",
+                )
+                return redirect("purchase_order_list")
+
+            purchase_order.save()
     else:
         form = PurchaseOrderForm()
 
@@ -142,8 +152,12 @@ def purchase_order_create(request):
 @department_required("procurement") 
 @role_required("officer") 
 def purchase_order_update(request, po_id):
+    purchase_order = filter_by_user_scope(
+        PurchaseOrder.objects.all(),
+        request.user,
+    )
     purchase_order = get_object_or_404(
-        PurchaseOrder,
+        purchase_order,
         id=po_id,
     )
 
@@ -268,15 +282,19 @@ def purchase_order_update(request, po_id):
     )
 
 
-@login_required
-@department_required("procurement")
-@role_required("manager")
+@login_required 
+@department_required("procurement") 
+@role_required("admin") 
 def purchase_order_delete(request, po_id):
-    purchase_order = get_object_or_404(
-        PurchaseOrder,
-        id=po_id,
+    purchase_orders = filter_by_user_scope(
+        PurchaseOrder.objects.all(),
+        request.user,
     )
 
+    purchase_order = get_object_or_404(
+        purchase_orders,
+        id=po_id,
+    )
     if request.method == "POST":
 
         log_action(
@@ -320,12 +338,20 @@ def purchase_order_delete(request, po_id):
     )
 
 
-@login_required
-@department_required("procurement")
-@role_required("viewer")
+@login_required 
+@department_required("procurement") 
+@role_required("viewer") 
 def purchase_order_detail(request, po_id):
+    purchase_orders = filter_by_user_scope(
+        PurchaseOrder.objects.select_related(
+            "supplier",
+            "branch",
+        ),
+        request.user,
+    )
+
     purchase_order = get_object_or_404(
-        PurchaseOrder.objects.select_related("supplier"),
+        purchase_orders,
         id=po_id,
     )
 
@@ -340,8 +366,13 @@ def purchase_order_detail(request, po_id):
 @department_required("procurement")
 @role_required("officer")
 def purchase_order_item_create(request, po_id):
+    purchase_order = filter_by_user_scope(
+        PurchaseOrder.objects.all(),
+        request.user,
+    )
+
     purchase_order = get_object_or_404(
-        PurchaseOrder,
+        purchase_order,
         id=po_id,
     )
 
@@ -390,11 +421,16 @@ def purchase_order_item_create(request, po_id):
 @department_required("procurement")
 @role_required("officer")
 def purchase_order_item_update(request, item_id):
-    item = get_object_or_404(
+    item = filter_by_user_scope(
         PurchaseOrderItem.objects.select_related(
             "purchase_order",
             "purchase_order__supplier",
         ),
+        request.user,
+        branch_field="purchase_order__branch",
+    )
+    item = get_object_or_404(
+        item,
         id=item_id,
     )
 
@@ -443,12 +479,18 @@ def purchase_order_item_update(request, item_id):
 
 @login_required
 @department_required("procurement")
-@role_required("officer")
+@role_required("admin")
 def purchase_order_item_delete(request, item_id):
-    item = get_object_or_404(
+    item = filter_by_user_scope(
         PurchaseOrderItem.objects.select_related(
-            "purchase_order"
+            "purchase_order",
+            "purchase_order__supplier",
         ),
+        request.user,
+        branch_field="purchase_order__branch",
+    )
+    item = get_object_or_404(
+        item,
         id=item_id,
     )
 
@@ -480,5 +522,44 @@ def purchase_order_item_delete(request, item_id):
             "purchase_order": purchase_order,
         },
     )
+
+@login_required
+@department_required("procurement")
+@role_required("viewer")
+def purchase_order_export_csv(request):
+    purchase_orders = PurchaseOrder.objects.select_related(
+        "supplier",
+        "branch",
+        "branch__company",
+        ).all()
+    purchase_orders = filter_by_user_scope(
+        purchase_orders,
+        request.user,
+    )
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="purchase_orders.csv"'
+
+    writer = csv.writer(response)
+
+    writer.writerow([
+        "PO Number",
+        "Supplier",
+        "Order Date",
+        "Expected Delivery",
+        "Status",
+        "Total Amount",
+    ])
+
+    for po in purchase_orders:
+        writer.writerow([
+            po.po_number,
+            po.supplier.name,
+            po.order_date,
+            po.expected_delivery,
+            po.get_status_display(),
+            po.total_amount,
+        ])
+
+    return response
 
 # Create your views here.

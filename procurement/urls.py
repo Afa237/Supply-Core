@@ -44,4 +44,9 @@ urlpatterns = [
         views.purchase_order_item_delete,
         name="purchase_order_item_delete",
         ),
+    path(
+        "purchase-orders/download/",
+        views.purchase_order_export_csv,
+        name="purchase_order_export_csv",
+    ),
 ]

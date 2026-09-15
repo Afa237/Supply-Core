@@ -19,7 +19,9 @@ from notifications.services import (
 from warehouse.models import Warehouse
 from procurement.models import PurchaseOrder
 from notifications.models import Alert
-
+import csv
+from django.http import HttpResponse
+from accounts.access import filter_by_user_scope
 
 
 @login_required
@@ -32,6 +34,13 @@ def shipment_list(request):
         "destination_warehouse",
         "driver",
         "vehicle",
+        "branch",
+        "branch__company",
+    )
+    
+    shipments = filter_by_user_scope(
+        shipments,
+        request.user,
     )
 
     query = request.GET.get(
@@ -316,6 +325,16 @@ def shipment_create(request):
                 shipment.created_by = (
                     request.user
                 )
+                profile = request.user.profile
+
+                if profile.branch:
+                    shipment.branch = profile.branch
+                else:
+                    messages.error(
+                        request,
+                        "Your account must be assigned to a branch before creating a shipment.",
+                    )
+                    return redirect("shipment_list")
 
                 shipment.save()
                 Alert.objects.filter(
@@ -373,8 +392,12 @@ def shipment_create(request):
 @department_required("logistics")
 @role_required("officer")
 def shipment_update(request, shipment_id):
+    shipments = filter_by_user_scope(
+    Shipment.objects.all(),
+    request.user,
+    )
     shipment = get_object_or_404(
-        Shipment,
+        shipments,
         id=shipment_id,
     )
 
@@ -418,6 +441,10 @@ def shipment_update(request, shipment_id):
 @department_required("logistics")
 @role_required("viewer")
 def shipment_detail(request, shipment_id):
+    shipments = filter_by_user_scope(
+    Shipment.objects.all(),
+    request.user,
+    )
     shipment = get_object_or_404(
         Shipment.objects.select_related(
             "purchase_order",
@@ -425,7 +452,14 @@ def shipment_detail(request, shipment_id):
             "driver",
             "vehicle",
             "created_by",
+            "branch",
         ),
+        shipments = filter_by_user_scope(
+            shipments,
+            request.user,
+        ),
+        shipment = get_object_or_404(
+            Shipment,
         id=shipment_id,
     )
 
@@ -438,8 +472,12 @@ def shipment_detail(request, shipment_id):
 
 @login_required
 @department_required("logistics")
-@role_required("manager")
+@role_required("admin")
 def shipment_delete(request, shipment_id):
+    shipments = filter_by_user_scope(
+    Shipment.objects.all(),
+    request.user,
+    )
     shipment = get_object_or_404(
         Shipment,
         id=shipment_id,
@@ -617,3 +655,48 @@ def receive_shipment(request, shipment_id):
         "shipment_detail",
         shipment_id=shipment.id,
     )
+@login_required
+@department_required("logistics")
+@role_required("viewer")
+def shipment_export_csv(request):
+    shipments = Shipment.objects.select_related(
+        "purchase_order",
+        "destination_warehouse",
+        "driver",
+        "vehicle",
+        "branch",
+        "branch__company",
+    )
+    
+    shipments = filter_by_user_scope(
+        shipments,
+        request.user,
+    )
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="shipments.csv"'
+
+    writer = csv.writer(response)
+
+    writer.writerow([
+        "Tracking Number",
+        "Purchase Order",
+        "Destination",
+        "Driver",
+        "Vehicle",
+        "Status",
+        "Expected Delivery",
+    ])
+
+    for shipment in shipments:
+        writer.writerow([
+            shipment.tracking_number,
+            shipment.purchase_order.po_number,
+            shipment.destination_warehouse.name,
+            shipment.driver.name if shipment.driver else "",
+            shipment.vehicle.registration_number if shipment.vehicle else "",
+            shipment.get_status_display(),
+            shipment.estimated_delivery_date,
+        ])
+
+    return response
+

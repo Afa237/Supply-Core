@@ -24,4 +24,9 @@ urlpatterns = [
         views.warehouse_delete,
         name="warehouse_delete",
     ),
+    path(
+        "download/",
+        views.warehouse_export_csv,
+        name="warehouse_export_csv",
+    ),
 ]

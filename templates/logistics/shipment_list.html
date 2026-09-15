@@ -11,10 +11,13 @@
     <div class="d-flex gap-2 flex-wrap">
         <a href="{% url 'driver_list' %}" class="btn btn-outline-primary">Drivers</a>
         <a href="{% url 'vehicle_list' %}" class="btn btn-outline-primary">Vehicles</a>
-        {% if request.user.is_superuser or request.user.profile.role != "viewer" %}
+        {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
             <a href="{% url 'shipment_create' %}" class="btn btn-primary">Create Shipment</a>
         {% endif %}
     </div>
+    <a href="{% url 'shipment_export_csv'%}" class="btn btn-outline-success">
+        Download CSV
+    </a>
 </div>
 
 {% if messages %}
@@ -281,13 +284,15 @@
                             <td>{{ shipment.estimated_delivery_date|date:"d M Y" }}</td>
                             <td class="actions-cell">
                                 <div class="action-buttons">
+                                    <!--EVERYONE-->
                                     <a href="{% url 'shipment_detail' shipment.id %}"
                                        class="btn btn-sm btn-outline-dark">View</a>
-                                       {% if request.user.is_superuser or request.user.profile.role != "viewer" %}
+                                    <!--OFFICER + MANAGER + ADMIN -->
+                                       {% if request.user.is_superuser or request.user.profile.role != "admin" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
                                     <a href="{% url 'shipment_update' shipment.id %}"
                                        class="btn btn-sm btn-outline-primary">Edit</a>
                                        {% endif %}
-                                    {% if request.user.is_superuser or request.user.profile.role == "manager" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "admin" %}
+                                    {% if request.user.is_superuser or request.user.profile.role == "admin" %}
                                     <a href="{% url 'shipment_delete' shipment.id %}"
                                        class="btn btn-sm btn-outline-danger">Delete</a>
                                     {% endif %}
