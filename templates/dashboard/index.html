@@ -20,6 +20,18 @@
                 Welcome back,
                 {{ request.user.first_name|default:request.user.username }}
             </h2>
+            {% if selected_branch %}
+            <p class="mb-1">
+                <strong>
+                    📍 {{ selected_branch.name }}
+                </strong>
+                — {{ selected_branch.city }}, {{ selected_branch.country }}
+            </p>
+            {% elif is_full_access %}
+            <p class="mb-1">
+                <strong>🌍 All Company Branches</strong>
+            </p>
+            {% endif %}
 
             {% if request.user.is_superuser %}
 
@@ -44,12 +56,29 @@
 
             <a
                 href="{% url 'alert_list' %}"
-                class="btn btn-outline-danger"
+                class="btn btn-sm btn-outline-danger"
             >
                 🔔 Alerts
             </a>
 
         </div>
+        {% if is_full_access %}
+        <select
+            name="branch"
+            class="form-select form-select-sm"
+            onchange="this.form.submit()">
+            <option value="">
+                All Branches
+            </option>
+            {% for branch in available_branches %}
+            <option
+                value="{{ branch.id }}"
+                {% if selected_branch and selected_branch.id == branch.id %}selected{% endif %}>
+                {{ branch.name }} - {{ branch.country }}
+            </option>
+            {% endfor %}
+        </select>
+        {% endif %}
 
     </div>
 

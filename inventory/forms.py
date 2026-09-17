@@ -1,9 +1,18 @@
 from django import forms
-
-from .models import Inventory, StockMovement
-
+from .models import Inventory, StockMovement 
+from warehouse.models import Warehouse 
+from accounts.access import filter_by_user_scope
 
 class InventoryForm(forms.ModelForm):
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if user:
+            self.fields["warehouse"].queryset = filter_by_user_scope(
+                Warehouse.objects.all(),
+                user,
+            )
+
     class Meta:
         model = Inventory
         fields = [
@@ -11,7 +20,6 @@ class InventoryForm(forms.ModelForm):
             "warehouse",
             "quantity",
         ]
-
 
 class StockMovementForm(forms.ModelForm):
     class Meta:
@@ -24,5 +32,7 @@ class StockMovementForm(forms.ModelForm):
         ]
 
         widgets = {
-            "notes": forms.Textarea(attrs={"rows": 3}),
+            "notes": forms.Textarea(
+                attrs={"rows": 3}
+            ),
         }

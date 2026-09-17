@@ -14,25 +14,34 @@
             {{ customer.name }}
         </h2>
 
-        <p class="text-muted mb-0">
+        <p class="text-muted mb-2">
             Complete customer profile and relationship history.
         </p>
+
+        {% if customer.branch %}
+            <span class="badge rounded-pill bg-light text-dark border">
+                {{ customer.branch.name }}
+            </span>
+        {% endif %}
 
     </div>
 
 
     <div class="d-flex gap-2">
-
+        {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
+            
         <a
             href="{% url 'customer_update' customer.id %}"
-            class="btn btn-outline-primary"
+            class="btn btn-sm btn-outline-primary"
         >
             Edit Customer
         </a>
+        
+        {% endif %}
 
         <a
             href="{% url 'customer_list' %}"
-            class="btn btn-secondary"
+            class="btn btn-sm btn-secondary"
         >
             Back
         </a>
@@ -245,7 +254,7 @@
 
                     <div class="fw-semibold">
                         {% if last_transaction %}
-                            {{ last_transaction.date|date:"d M Y, H:i" }}
+                            {{ last_transaction.created_at|date:"d M Y, H:i" }}
                         {% else %}
                             No transactions yet.
                         {% endif %}
@@ -279,14 +288,22 @@
                 </h5>
 
             </div>
-
-
-            <a
-                href="{% url 'customer_transaction_create' customer.id %}"
-                class="btn btn-primary"
-            >
-                + Record Dispatch
-            </a>
+            <div class="d-flex gap-2 flex-wrap">
+                <a 
+                    href="{% url 'customer_history_csv' customer.id %}"
+                    class="btn btn-sm btn-outline-success"
+                >
+                    Download History
+                </a>
+                {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
+                    <a 
+                        href="{% url 'customer_transaction_create' customer.id %}"
+                        class="btn btn-sm btn-primary"
+                    >
+                        + Record Dispatch 
+                    </a>
+                {% endif %}
+            </div>
 
         </div>
 
@@ -295,9 +312,9 @@
 
             <div class="table-responsive">
 
-                <table class="table align-middle">
+                <table class="table table-hover align-middle mb-0">
 
-                    <thead>
+                    <thead class="table-light">
 
                         <tr>
                             <th>Date</th>

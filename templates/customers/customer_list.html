@@ -2,427 +2,241 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<!-- CUSTOMER HEADER -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
 
-    <div>
+            <div>
+                <p class="dashboard-eyebrow mb-1">CUSTOMER MANAGEMENT</p>
+                <h2 class="mb-1">Customers</h2>
+                <p class="text-muted mb-0">
+                    Manage customer profiles, relationships and transaction activity.
+                </p>
+            </div>
 
-        <p class="dashboard-eyebrow mb-1">
-            CUSTOMER MANAGEMENT
-        </p>
+            {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
+                <a href="{% url 'customer_create' %}" class="btn btn-primary">
+                    + Add Customer
+                </a>
+            {% endif %}
 
-        <h2 class="mb-1">
-            Customers
-        </h2>
-
-        <p class="text-muted mb-0">
-            Manage customer profiles and commercial relationships.
-        </p>
-
+        </div>
     </div>
-
-
-    <a
-        href="{% url 'customer_create' %}"
-        class="btn btn-primary"
-    >
-        + Add Customer
-    </a>
-
 </div>
 
 
-<!-- =====================================
-     CUSTOMER FILTERS
-===================================== -->
+<!-- FILTERS -->
+<form method="get" class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
 
-<form
-    method="get"
-    class="card border-0 shadow-sm mb-4"
->
-
-    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <p class="dashboard-eyebrow mb-1">FILTERS</p>
+                <h5 class="mb-0">Find Customers</h5>
+            </div>
+        </div>
 
         <div class="row g-3">
 
-
-            <!-- SEARCH -->
-
-            <div class="col-lg-4">
-
+            <div class="col-lg-4 col-md-6">
+                <label class="form-label small text-muted">Search</label>
                 <input
                     type="search"
                     name="q"
                     value="{{ query }}"
                     class="form-control"
-                    placeholder="Search name, contact, phone, email or city"
+                    placeholder="Name, contact, phone, email or city"
                 >
-
             </div>
 
-
-            <!-- STATUS -->
-
-            <div class="col-lg-2">
-
-                <select
-                    name="status"
-                    class="form-select"
-                >
-
-                    <option value="">
-                        All statuses
-                    </option>
-
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label small text-muted">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All statuses</option>
                     {% for value, label in status_choices %}
-
-                        <option
-                            value="{{ value }}"
-                            {% if selected_status == value %}
-                                selected
-                            {% endif %}
-                        >
+                        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>
                             {{ label }}
                         </option>
-
                     {% endfor %}
-
                 </select>
-
             </div>
 
-
-            <!-- CUSTOMER TYPE -->
-
-            <div class="col-lg-2">
-
-                <select
-                    name="type"
-                    class="form-select"
-                >
-
-                    <option value="">
-                        All types
-                    </option>
-
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label small text-muted">Customer Type</label>
+                <select name="type" class="form-select">
+                    <option value="">All types</option>
                     {% for value, label in type_choices %}
-
-                        <option
-                            value="{{ value }}"
-                            {% if selected_type == value %}
-                                selected
-                            {% endif %}
-                        >
+                        <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>
                             {{ label }}
                         </option>
-
                     {% endfor %}
-
                 </select>
-
             </div>
 
-
-            <!-- CITY -->
-
-            <div class="col-lg-2">
-
-                <select
-                    name="city"
-                    class="form-select"
-                >
-
-                    <option value="">
-                        All cities
-                    </option>
-
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label small text-muted">City</label>
+                <select name="city" class="form-select">
+                    <option value="">All cities</option>
                     {% for city in cities %}
-
-                        <option
-                            value="{{ city }}"
-                            {% if selected_city == city %}
-                                selected
-                            {% endif %}
-                        >
+                        <option value="{{ city }}" {% if selected_city == city %}selected{% endif %}>
                             {{ city }}
                         </option>
-
                     {% endfor %}
-
                 </select>
-
             </div>
 
-
-            <!-- FREQUENT CUSTOMERS -->
-
-            <div class="col-lg-2 d-flex align-items-center">
-
-                <div class="form-check">
-
+            <div class="col-lg-2 col-md-6 d-flex align-items-end">
+                <div class="form-check mb-2">
                     <input
                         class="form-check-input"
                         type="checkbox"
                         name="frequent"
                         value="yes"
                         id="frequentCustomers"
-                        {% if selected_frequent == "yes" %}
-                            checked
-                        {% endif %}
+                        {% if selected_frequent == "yes" %}checked{% endif %}
                     >
-
-                    <label
-                        class="form-check-label"
-                        for="frequentCustomers"
-                    >Frequent only
+                    <label class="form-check-label" for="frequentCustomers">
+                        Frequent only
                     </label>
-
                 </div>
-
             </div>
 
-
-            <!-- DATE FROM -->
-
-            <div class="col-lg-3">
-
-                <label
-                    class="form-label small text-muted"
-                >
-                    Customer since — from
-                </label>
-
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small text-muted">Customer since — from</label>
                 <input
                     type="date"
                     name="date_from"
                     value="{{ selected_date_from }}"
                     class="form-control"
                 >
-
             </div>
 
-
-            <!-- DATE TO -->
-
-            <div class="col-lg-3">
-
-                <label
-                    class="form-label small text-muted"
-                >
-                    Customer since — to
-                </label>
-
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small text-muted">Customer since — to</label>
                 <input
                     type="date"
                     name="date_to"
                     value="{{ selected_date_to }}"
                     class="form-control"
                 >
-
             </div>
 
-
-            <!-- APPLY FILTERS -->
-
-            <div class="col-lg-3 d-flex align-items-end">
-
-                <button
-                    type="submit"
-                    class="btn btn-outline-primary w-100"
-                >
+            <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary w-100">
                     Apply Filters
                 </button>
-
             </div>
 
-
-            <!-- CLEAR FILTERS -->
-
-            <div class="col-lg-3 d-flex align-items-end">
-
-                <a
-                    href="{% url 'customer_list' %}"
-                    class="btn btn-outline-secondary w-100"
-                >
+            <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary w-100">
                     Clear Filters
                 </a>
-
             </div>
 
-
         </div>
-
     </div>
-
 </form>
 
 
-<!-- =====================================
-     CUSTOMER TABLE
-===================================== -->
-
+<!-- CUSTOMER TABLE -->
 <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
 
-    <div class="card-body">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+            <div>
+                <p class="dashboard-eyebrow mb-1">CUSTOMER DIRECTORY</p>
+                <h5 class="mb-0">Customer Records</h5>
+            </div>
+
+            <span class="badge rounded-pill bg-light text-dark border">
+                {{ customers|length }} record{{ customers|length|pluralize }}
+            </span>
+        </div>
 
         <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
 
-            <table class="table align-middle">
-
-                <thead>
-
+                <thead class="table-light">
                     <tr>
-
                         <th>Customer</th>
-
                         <th>Type</th>
-
                         <th>Contact</th>
-
                         <th>Location</th>
-
                         <th>Status</th>
-
                         <th>Customer Since</th>
-
                         <th>Transactions</th>
-
-                        <th>Actions</th>
-
+                        <th class="text-end">Actions</th>
                     </tr>
-
                 </thead>
-
 
                 <tbody>
 
                     {% for customer in customers %}
-
                         <tr>
 
-
-                            <!-- CUSTOMER -->
-
                             <td>
-
-                                <strong>
-                                    {{ customer.name }}
-                                </strong>
+                                <div class="fw-semibold">{{ customer.name }}</div>
 
                                 {% if customer.email %}
+                                    <div class="small text-muted">{{ customer.email }}</div>
+                                {% endif %}
 
-                                    <div class="small text-muted">
-                                        {{ customer.email }}
+                                {% if customer.branch %}
+                                    <div class="small text-muted mt-1">
+                                        {{ customer.branch.name }}
                                     </div>
-
                                 {% endif %}
-
                             </td>
 
-
-                            <!-- TYPE -->
-
                             <td>
-
-                                {{ customer.get_customer_type_display }}
-
-                            </td>
-
-
-                            <!-- CONTACT -->
-
-                            <td>
-
-                                {% if customer.contact_person %}
-
-                                    {{ customer.contact_person }}
-
-                                    <br>
-
-                                {% endif %}
-
-                                <span class="text-muted">
-
-                                    {{ customer.phone|default:"—" }}
-
+                                <span class="badge bg-light text-dark border">
+                                    {{ customer.get_customer_type_display }}
                                 </span>
-
                             </td>
 
-
-                            <!-- LOCATION -->
+                            <td>
+                                {% if customer.contact_person %}
+                                    <div>{{ customer.contact_person }}</div>
+                                {% endif %}
+                                <div class="small text-muted">
+                                    {{ customer.phone|default:"—" }}
+                                </div>
+                            </td>
 
                             <td>
-
-                                {{ customer.city|default:"—" }}
-
+                                <div>{{ customer.city|default:"—" }}</div>
                                 {% if customer.country %}
-
-                                    <div class="small text-muted">
-
-                                        {{ customer.country }}</div>
-
+                                    <div class="small text-muted">{{ customer.country }}</div>
                                 {% endif %}
-
                             </td>
 
-
-                            <!-- STATUS -->
-
                             <td>
-
                                 {% if customer.status == "active" %}
-
-                                    <span class="badge bg-success">
-                                        Active
-                                    </span>
-
+                                    <span class="badge rounded-pill bg-success">Active</span>
                                 {% else %}
-
-                                    <span class="badge bg-secondary">
-                                        Inactive
-                                    </span>
-
+                                    <span class="badge rounded-pill bg-secondary">Inactive</span>
                                 {% endif %}
-
                             </td>
 
-
-                            <!-- CUSTOMER SINCE -->
-
-                            <td>
-
+                            <td class="text-nowrap">
                                 {{ customer.created_at|date:"d M Y" }}
-
                             </td>
-
-
-                            <!-- TRANSACTION COUNT -->
 
                             <td>
-
                                 {% if customer.transaction_count >= 5 %}
-
-                                    <span class="badge bg-primary">
-
-                                        {{ customer.transaction_count }}
-                                        Frequent
-
+                                    <span class="badge rounded-pill bg-primary">
+                                        {{ customer.transaction_count }} Frequent
                                     </span>
-
                                 {% else %}
-
-                                    {{ customer.transaction_count }}
-
+                                    <span class="badge bg-light text-dark border">
+                                        {{ customer.transaction_count }}
+                                    </span>
                                 {% endif %}
-
                             </td>
 
-
-                            <!-- ACTIONS -->
-
-                            <td class="actions-cell">
-
-                                <div class="action-buttons">
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end flex-wrap">
 
                                     <a
                                         href="{% url 'customer_detail' customer.id %}"
@@ -431,49 +245,41 @@
                                         View
                                     </a>
 
-
-                                    <a
-                                        href="{% url 'customer_update' customer.id %}"
-                                        class="btn btn-sm btn-outline-primary"
-                                    >
-                                        Edit
-                                    </a>
+                                    {% if request.user.is_superuser or request.user.profile.role == "admin" or request.user.profile.role == "supply_chain_manager" or request.user.profile.role == "manager" or request.user.profile.role == "officer" %}
+                                        <a
+                                            href="{% url 'customer_update' customer.id %}"
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            Edit
+                                        </a>
+                                    {% endif %}
 
                                 </div>
-
                             </td>
 
-
                         </tr>
-
 
                     {% empty %}
 
-
                         <tr>
-
-                            <td
-                                colspan="8"
-                                class="text-center text-muted py-5"
-                            >
-
-                                No customers match the selected filters.
-
+                            <td colspan="8" class="text-center py-5">
+                                <div class="text-muted mb-2">
+                                    No customers match the selected filters.
+                                </div>
+                                <a href="{% url 'customer_list' %}" class="btn btn-sm btn-outline-secondary">
+                                    Clear Filters
+                                </a>
                             </td>
-
                         </tr>
-
 
                     {% endfor %}
 
                 </tbody>
 
             </table>
-
         </div>
 
     </div>
-
 </div>
 
 {% endblock %}
